@@ -46,6 +46,16 @@ Or run the main class directly:
 
 ### Access the Application
 - Application: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API Docs: http://localhost:8080/api-docs
+
+### Actuator Endpoints
+- Health: http://localhost:8080/actuator/health
+- Info: http://localhost:8080/actuator/info
+- Loggers: http://localhost:8080/actuator/loggers
+  - View all loggers: GET /actuator/loggers
+  - View specific logger: GET /actuator/loggers/{loggerName}
+  - Update logger level: POST /actuator/loggers/{loggerName} with body: `{"configuredLevel": "DEBUG"}`
 
 ### Run Tests
 ```bash
