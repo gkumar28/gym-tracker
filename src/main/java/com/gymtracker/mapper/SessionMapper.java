@@ -2,6 +2,7 @@ package com.gymtracker.mapper;
 
 import com.gymtracker.entity.Session;
 import com.gymtracker.entity.Workout;
+import com.gymtracker.entity.SessionExercise;
 import com.gymtracker.schemaobject.SessionSO;
 
 import java.util.List;

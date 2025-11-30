@@ -17,7 +17,7 @@ public class ExerciseSO {
 
     @NotBlank(message = "Exercise name cannot be blank")
     @Size(min = 1, max = 255, message = "Exercise name must be between 1 and 255 characters")
-    @Schema(description = "Name of the exercise", example = "Bench Press", required = true)
+    @Schema(description = "Name of the exercise", example = "Bench Press")
     private String name;
 
     @Size(max = 1000, message = "Logo URL cannot exceed 1000 characters")
