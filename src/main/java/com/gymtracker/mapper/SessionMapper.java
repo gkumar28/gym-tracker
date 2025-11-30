@@ -4,6 +4,9 @@ import com.gymtracker.entity.Session;
 import com.gymtracker.entity.Workout;
 import com.gymtracker.schemaobject.SessionSO;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SessionMapper {
 
     public static SessionSO toSO(Session session) {
@@ -15,6 +18,7 @@ public class SessionMapper {
         if (session.getWorkout() != null) {
             so.setWorkoutId(session.getWorkout().getId());
         }
+        so.setSessionExercises(SessionExerciseMapper.toSOList(session.getSessionExercises()));
         so.setSessionDate(session.getSessionDate());
         so.setNotes(session.getNotes());
         so.setDurationMinutes(session.getDurationMinutes());
@@ -33,6 +37,22 @@ public class SessionMapper {
         session.setNotes(so.getNotes());
         session.setDurationMinutes(so.getDurationMinutes());
         session.setCreatedAt(so.getCreatedAt());
+        
+        List<SessionExercise> sessionExercises = SessionExerciseMapper.toEntityList(so.getSessionExercises());
+        if (sessionExercises != null) {
+            sessionExercises.forEach(se -> se.setSession(session));
+            session.setSessionExercises(sessionExercises);
+        }
+        
         return session;
+    }
+
+    public static List<SessionSO> toSOList(List<Session> sessions) {
+        if (sessions == null) {
+            return null;
+        }
+        return sessions.stream()
+                .map(SessionMapper::toSO)
+                .collect(Collectors.toList());
     }
 }

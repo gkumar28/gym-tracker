@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "sessions")
@@ -16,8 +18,12 @@ public class Session {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_id", nullable = false)
+    @JoinColumn(name = "workout_id")
     private Workout workout;
+
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("exerciseOrder ASC")
+    private List<SessionExercise> sessionExercises = new ArrayList<>();
 
     @Column(name = "session_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
