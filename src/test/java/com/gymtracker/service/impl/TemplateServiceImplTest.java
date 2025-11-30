@@ -1,7 +1,6 @@
 package com.gymtracker.service.impl;
 
 import com.gymtracker.entity.Template;
-import com.gymtracker.mapper.TemplateMapper;
 import com.gymtracker.repository.TemplateRepository;
 import com.gymtracker.schemaobject.TemplateSO;
 import org.junit.jupiter.api.BeforeEach;

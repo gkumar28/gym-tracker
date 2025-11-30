@@ -1,7 +1,6 @@
 package com.gymtracker.service.impl;
 
 import com.gymtracker.entity.Exercise;
-import com.gymtracker.mapper.ExerciseMapper;
 import com.gymtracker.repository.ExerciseRepository;
 import com.gymtracker.schemaobject.ExerciseSO;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,12 +27,9 @@ class ExerciseServiceImplTest {
     private ExerciseServiceImpl exerciseService;
 
     private Exercise exercise;
-    private ExerciseSO exerciseSO;
-
     @BeforeEach
     void setUp() {
         exercise = new Exercise(1L, "Bench Press", "logo.png");
-        exerciseSO = new ExerciseSO(1L, "Bench Press", "logo.png");
     }
 
     @Test
@@ -83,7 +78,6 @@ class ExerciseServiceImplTest {
     @Test
     void testCreateExercise() {
         ExerciseSO newExerciseSO = new ExerciseSO(null, "Squat", "squat.png");
-        Exercise newExercise = new Exercise(null, "Squat", "squat.png");
         Exercise savedExercise = new Exercise(2L, "Squat", "squat.png");
 
         when(exerciseRepository.save(any(Exercise.class))).thenReturn(savedExercise);
