@@ -62,6 +62,20 @@ Or run the main class directly:
 ./gradlew test
 ```
 
+### Gradle Wrapper
+If the Gradle Wrapper scripts are not present, generate them locally (you must have Gradle installed for this step):
+```cmd
+gradle wrapper --gradle-version 8.4.1 --distribution-type all
+```
+After generating wrapper files, you can run the wrapper directly in Windows:
+```cmd
+gradlew.bat --version
+gradlew.bat tasks --all
+```
+
+### Tests & Local DB
+Tests are configured to use an in-memory H2 database (test runtime only) by the Gradle `test` task system properties, so you do not need a local PostgreSQL instance to run unit/integration tests.
+
 ## Project Structure
 ```
 src/
