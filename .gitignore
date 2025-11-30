@@ -47,3 +47,4 @@ bin/
 
 # Application specific
 application-local.properties
+*.crt

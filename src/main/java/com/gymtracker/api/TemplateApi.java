@@ -23,7 +23,7 @@ import java.util.List;
     name = "Template API",
     description = "API endpoints for managing and searching workout templates"
 )
-@RequestMapping("/api/templates")
+@RequestMapping("/api/template")
 public interface TemplateApi {
     
     @Operation(

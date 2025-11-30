@@ -6,10 +6,15 @@ spring:
     name: gym-tracker
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/gymtracker
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://db.fbuphqvscgtsvncmgdwx.supabase.co:5432/postgres?ssl=true&sslmode=verify-full
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      data-source-properties:
+        ssl: true
+        sslmode: verify-full
+        sslrootcert: ${DB_SSL_CERT}
   
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -36,9 +41,9 @@ management:
     health:
       show-details: always
     info:
-      enabled: true
+      access: READ_ONLY
     loggers:
-      enabled: true
+      access: READ_ONLY
   info:
     env:
       enabled: true
@@ -59,3 +64,5 @@ logging:
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

@@ -21,7 +21,7 @@ import java.util.List;
     name = "Exercise API",
     description = "API endpoints for managing and searching exercises"
 )
-@RequestMapping("/api/exercises")
+@RequestMapping("/api/exercise")
 public interface ExerciseApi {
     
     @Operation(

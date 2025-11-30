@@ -18,7 +18,7 @@ import java.util.List;
     name = "Session API",
     description = "API endpoints for managing workout sessions"
 )
-@RequestMapping("/api/sessions")
+@RequestMapping("/api/session")
 public interface SessionApi {
     
     @Operation(
