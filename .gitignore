@@ -48,3 +48,6 @@ bin/
 # Application specific
 application-local.properties
 *.crt
+
+# UI specific
+node_modules
