@@ -51,3 +51,4 @@ application-local.properties
 
 # UI specific
 node_modules
+package-lock.json
