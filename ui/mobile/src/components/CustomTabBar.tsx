@@ -26,6 +26,8 @@ export default function CustomTabBar({
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   const [overlayLabel, setOverlayLabel] = useState<string | null>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const overlayTimeoutRef = useRef<number | null>(null);
 
   // helper method to get Tab label
   const getLabel = (route) => (descriptors[route.key].options.tabBarLabel ??
@@ -48,16 +50,16 @@ export default function CustomTabBar({
   const overlayAnim = useRef(new Animated.Value(0)).current;
   const overlayHeightAnim = useRef(new Animated.Value(0)).current;
   /* ----------------------------------------
-   * Overlay driven ONLY by pressedKey
+   * Overlay driven ONLY by showOverlay state
    * -------------------------------------- */
   useEffect(() => {
     Animated.spring(overlayAnim, {
-      toValue: pressedKey ? 1 : 0,
+      toValue: showOverlay ? 1 : 0,
       tension: 80,
       friction: 4,
       useNativeDriver: false,
     }).start();
-  }, [pressedKey, overlayAnim]);
+  }, [showOverlay, overlayAnim]);
 
   /* ----------------------------------------
    * Hover / press handlers
@@ -88,12 +90,29 @@ export default function CustomTabBar({
     setPressedKey(route.key);
     setOverlayLabel(getLabel(route));
     animateTab(route.key, 1);
+    
+    // Clear any existing timeout
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+    }
+    
+    // Set new timeout to show overlay after delay
+    overlayTimeoutRef.current = setTimeout(() => {
+      setShowOverlay(true);
+    }, 200); // 200ms delay
   };
 
   const handlePressOut = (route: any) => {
     setPressedKey(null);
     setOverlayLabel(null);
     animateTab(route.key, 0);
+    
+    // Clear timeout and hide overlay immediately
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+      overlayTimeoutRef.current = null;
+    }
+    setShowOverlay(false);
   };
 
   const containerStyle = useMemo(
@@ -108,7 +127,7 @@ export default function CustomTabBar({
         paddingBottom: Math.max(insets.bottom, 14),
       } 
     ],
-    [insets.bottom, theme.border]
+    [insets.bottom, theme.background]
   );
 
   const tabBarStyle = useMemo(
@@ -125,14 +144,14 @@ export default function CustomTabBar({
   const mobileOverlayStyle = useMemo(
     () => [
       {
-        position: 'absolute',
+        position: 'absolute' as const,
         left: 0 as const,
         right: 0 as const,
         bottom: 2 * Math.max(insets.bottom, 14) - 2,
         backgroundColor: theme.primary,
         justifyContent: 'center' as const,
         alignItems: 'center' as const,
-        height: 100,
+        height: 100 as const,
         opacity: overlayAnim,
         borderRadius: 12,
         transform: [
@@ -143,8 +162,8 @@ export default function CustomTabBar({
             }),
           },
           {
-            scaleY: overlayAnim
-          }
+            scaleY: overlayAnim as any
+          } as any
         ],
       }
     ],

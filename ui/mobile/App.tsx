@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation';
 import { useTheme } from './src/hooks/useTheme';
 import { createPaperTheme } from './src/theme/theme';
+import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppHeader from './src/components/AppHeader';
 import DrawerContent from './src/components/DrawerContent';
 
@@ -38,7 +39,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

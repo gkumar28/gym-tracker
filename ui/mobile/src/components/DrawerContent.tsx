@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { List, Text, Avatar, Divider } from 'react-native-paper';
 import { useTheme } from '../hooks/useTheme';
+import ThemeToggleSlider from './ThemeToggleSlider';
 
 interface DrawerContentProps {
   onClose: () => void;
@@ -21,6 +22,9 @@ export default function DrawerContent({ onClose }: DrawerContentProps) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Theme Toggle Slider */}
+      <ThemeToggleSlider />
+
       {/* User Profile Section */}
       <View style={styles.profileSection}>
         <Avatar.Text size={60} label="GT" style={{ backgroundColor: theme.primary }} />

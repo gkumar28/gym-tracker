@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { IconButton, Avatar } from 'react-native-paper';
-import { useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
+import { useThemeContext } from '../contexts/ThemeContext';
+import ThemeToggleSlider from './ThemeToggleSlider';
 
 interface AppHeaderProps {
   leftComponent?: React.ReactNode;
@@ -21,14 +22,13 @@ export default function AppHeader({
   onMenuPress 
 }: AppHeaderProps) {
   const theme = useTheme();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { isDark } = useThemeContext();
   const insets = useSafeAreaInsets();
 
   const basePaddingVertical = 14;
 
-  const headerBackgroundColor = backgroundColor || (isDark ? theme.background : '#ffffff');
-  const headerIconColor = isDark ? '#ffffff' : theme.text;
+  const headerBackgroundColor = backgroundColor || theme.background;
+  const headerIconColor = theme.text;
 
   const defaultLeftComponent = (
     <IconButton
@@ -40,11 +40,14 @@ export default function AppHeader({
   );
 
   const defaultRightComponent = (
-    <Avatar.Text 
-      size={43} 
-      label="GT" 
-      style={{ backgroundColor: theme.primary }} 
-    />
+    <View style={styles.rightComponentContainer}>
+      <ThemeToggleSlider />
+      <Avatar.Text 
+        size={43} 
+        label="GT" 
+        style={{ backgroundColor: theme.primary }} 
+      />
+    </View>
   );
 
   return (
@@ -81,5 +84,10 @@ const styles = StyleSheet.create({
   },
   flex1: {
     flex: 1,
+  },
+  rightComponentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
 });

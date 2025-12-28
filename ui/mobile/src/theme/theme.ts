@@ -39,31 +39,31 @@ export interface ResponsiveConfig {
 }
 
 export const lightTheme: ThemeConfig = {
-  primary: '#6366f1',
-  secondary: '#8b5cf6',
-  background: '#f1f5f9',
+  primary: '#2563eb',
+  secondary: '#64748b',
+  background: '#f8fafc',
   surface: '#ffffff',
-  accent: '#06b6d4',
+  accent: '#0284c7',
   text: '#1e293b',
   textSecondary: '#64748b',
   border: '#e2e8f0',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
+  success: '#059669',
+  warning: '#d97706',
+  error: '#dc2626',
 };
 
 export const darkTheme: ThemeConfig = {
-  primary: '#818cf8',
-  secondary: '#a78bfa',
-  background: '#0f172a',
-  surface: '#1e293b',
-  accent: '#22d3ee',
-  text: '#f1f5f9',
-  textSecondary: '#94a3b8',
-  border: '#334155',
-  success: '#34d399',
-  warning: '#fbbf24',
-  error: '#f87171',
+  primary: '#3b82f6',
+  secondary: '#6b7280',
+  background: '#111827',
+  surface: '#1f2937',
+  accent: '#0ea5e9',
+  text: '#f9fafb',
+  textSecondary: '#9ca3af',
+  border: '#374151',
+  success: '#10b981',
+  warning: '#f59e0b',
+  error: '#ef4444',
 };
 
 export const platformThemes = {
