@@ -1,0 +1,85 @@
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { IconButton, Avatar } from 'react-native-paper';
+import { useColorScheme } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../hooks/useTheme';
+
+interface AppHeaderProps {
+  leftComponent?: React.ReactNode;
+  rightComponent?: React.ReactNode;
+  centerComponent?: React.ReactNode;
+  backgroundColor?: string;
+  onMenuPress?: () => void;
+}
+
+export default function AppHeader({ 
+  leftComponent, 
+  rightComponent, 
+  centerComponent, 
+  backgroundColor,
+  onMenuPress 
+}: AppHeaderProps) {
+  const theme = useTheme();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
+
+  const basePaddingVertical = 14;
+
+  const headerBackgroundColor = backgroundColor || (isDark ? theme.background : '#ffffff');
+  const headerIconColor = isDark ? '#ffffff' : theme.text;
+
+  const defaultLeftComponent = (
+    <IconButton
+      icon="menu"
+      size={29}
+      iconColor={headerIconColor}
+      onPress={onMenuPress || (() => console.log('Menu pressed'))}
+    />
+  );
+
+  const defaultRightComponent = (
+    <Avatar.Text 
+      size={43} 
+      label="GT" 
+      style={{ backgroundColor: theme.primary }} 
+    />
+  );
+
+  return (
+    <View style={[
+      styles.header, 
+      { paddingTop: basePaddingVertical + insets.top, paddingBottom: basePaddingVertical },
+      { backgroundColor: headerBackgroundColor }
+    ]}>
+      <View style={styles.headerContent}>
+        {leftComponent || defaultLeftComponent}
+        <View style={styles.flex1} />
+        {centerComponent}
+        <View style={styles.flex1} />
+        {rightComponent || defaultRightComponent}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  flex1: {
+    flex: 1,
+  },
+});

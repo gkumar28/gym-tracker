@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import CustomTabBar from '../components/CustomTabBar';
 import HomeScreen from '../screens/HomeScreen';
 import WorkoutsList from '../screens/Workouts/WorkoutsList';
 import WorkoutDetail from '../screens/Workouts/WorkoutDetail';
@@ -38,11 +39,16 @@ function WorkoutsStack() {
 
 export function RootNavigator() {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        tabBarShowLabel: false,
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Workouts" component={WorkoutsStack} options={{ headerShown: false }} />
-      <Tab.Screen name="Sessions" component={SessionList} options={{ title: 'Sessions' }} />
-      <Tab.Screen name="Exercises" component={ExerciseSearch} options={{ title: 'Exercises' }} />
+      <Tab.Screen name="Sessions" component={SessionList} options={{ headerShown: false }} />
+      <Tab.Screen name="Exercises" component={ExerciseSearch} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }
