@@ -118,7 +118,7 @@ export default function CustomTabBar({
   const containerStyle = useMemo(
     () => [
       {
-        backgroundColor: 'transparent',
+        backgroundColor: theme.surface,
         borderTopColor: theme.background,
         borderTopWidth: 1,
         flexDirection: 'column' as const,
