@@ -221,10 +221,7 @@ export default function CustomTabBar({
                       transform: [
                         { 
                           scaleX: tabAnimations[route.key] 
-                        },
-                        { 
-                          scaleY: isActive ? 1.25 : 1 
-                        },
+                        }
                       ],
                     },
                   ]}
