@@ -18,8 +18,7 @@ export default function AppHeader({
   leftComponent, 
   rightComponent, 
   centerComponent, 
-  backgroundColor,
-  onMenuPress 
+  backgroundColor
 }: AppHeaderProps) {
   const theme = useTheme();
   const { isDark } = useThemeContext();
@@ -35,7 +34,6 @@ export default function AppHeader({
       icon="menu"
       size={29}
       iconColor={headerIconColor}
-      onPress={onMenuPress || (() => console.log('Menu pressed'))}
     />
   );
 

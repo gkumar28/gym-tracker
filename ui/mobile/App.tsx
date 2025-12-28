@@ -9,7 +9,6 @@ import { useTheme } from './src/hooks/useTheme';
 import { createPaperTheme } from './src/theme/theme';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppHeader from './src/components/AppHeader';
-import DrawerContent from './src/components/DrawerContent';
 
 const queryClient = new QueryClient();
 
@@ -27,7 +26,7 @@ function AppContent() {
     <PaperProvider theme={paperTheme}>
       <NavigationContainer>
         <View style={styles.container}>
-          <AppHeader onMenuPress={() => console.log('Menu pressed')} />
+          <AppHeader />
           <RootNavigator />
         </View>
       </NavigationContainer>

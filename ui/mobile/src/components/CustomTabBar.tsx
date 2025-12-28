@@ -8,9 +8,9 @@ import { useTheme } from '../hooks/useTheme';
 
 const tabIcons: Record<string, string> = {
   Home: 'home',
-  Workouts: 'dumbbell',
-  Sessions: 'calendar',
-  Exercises: 'target',
+  Workouts: 'clipboard-list-outline',
+  Sessions: 'dumbbell',
+  Exercises: 'database',
 };
 
 export default function CustomTabBar({

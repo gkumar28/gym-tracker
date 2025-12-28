@@ -99,14 +99,14 @@ export default function HomeScreen() {
           <Text variant="bodyLarge" style={[styles.goalTitle, { color: theme.text }]}>
             Complete 30 workouts this month
           </Text>
+          <Text variant="bodySmall" style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
+            22 of 30 workouts completed
+          </Text>
           <ProgressBar 
             progress={0.75} 
             color={theme.primary} 
             style={styles.progressBar}
           />
-          <Text variant="bodySmall" style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
-            22 of 30 workouts completed
-          </Text>
         </Card.Content>
       </Card>
 
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   progressBar: {
-    marginBottom: 8,
+    marginBottom: 0,
   },
   goalSubtitle: {
     marginBottom: 4,
@@ -244,8 +244,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
-    elevation: 3,
-    backgroundColor: '#ffffff',
+    elevation: 1,
   },
   actionContent: {
     flexDirection: 'row',
