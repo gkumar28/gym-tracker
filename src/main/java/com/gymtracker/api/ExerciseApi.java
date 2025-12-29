@@ -1,5 +1,6 @@
 package com.gymtracker.api;
 
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.ExerciseSO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,10 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,9 +23,9 @@ import java.util.List;
 public interface ExerciseApi {
     
     @Operation(
-        summary = "Search exercises by name",
-        description = "Searches for exercises by name using case-insensitive LIKE search. " +
-                     "Returns all exercises if no search term is provided.",
+        summary = "Search exercises with filters",
+        description = "Searches for exercises with optional filters for category, muscle group, equipment, and difficulty. " +
+                     "Supports pagination with limit and offset parameters.",
         operationId = "searchExercises"
     )
     @GetMapping("/search")
@@ -37,7 +35,7 @@ public interface ExerciseApi {
             description = "Successfully retrieved exercises",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ExerciseSO.class)
+                schema = @Schema(implementation = PaginatedResponse.class)
             )
         ),
         @ApiResponse(
@@ -51,20 +49,119 @@ public interface ExerciseApi {
             content = @Content
         )
     })
-    ResponseEntity<List<ExerciseSO>> searchExercises(
+    ResponseEntity<PaginatedResponse<ExerciseSO>> searchExercises(
         @Parameter(
-            description = "Search term to match exercise names (case-insensitive). " +
-                         "If empty or not provided, returns all exercises.",
+            description = "Search term to match exercise names or descriptions (case-insensitive)",
             example = "bench",
-            required = false,
-            schema = @Schema(type = "string", example = "bench")
+            required = false
         )
-        String searchTerm
+        @RequestParam(required = false) String search,
+        
+        @Parameter(
+            description = "Filter by exercise category",
+            example = "Strength",
+            required = false
+        )
+        @RequestParam(required = false) String category,
+        
+        @Parameter(
+            description = "Filter by muscle group",
+            example = "Chest",
+            required = false
+        )
+        @RequestParam(required = false) String muscle,
+        
+        @Parameter(
+            description = "Filter by equipment type",
+            example = "Barbell",
+            required = false
+        )
+        @RequestParam(required = false) String equipment,
+        
+        @Parameter(
+            description = "Filter by difficulty level",
+            example = "intermediate",
+            required = false,
+            schema = @Schema(allowableValues = {"beginner", "intermediate", "advanced"})
+        )
+        @RequestParam(required = false) String difficulty,
+        
+        @Parameter(
+            description = "Maximum number of exercises to return",
+            example = "10",
+            required = false
+        )
+        @RequestParam(required = false, defaultValue = "10") Integer limit,
+        
+        @Parameter(
+            description = "Number of exercises to skip for pagination",
+            example = "0",
+            required = false
+        )
+        @RequestParam(required = false, defaultValue = "0") Integer offset
     );
     
     @Operation(
+        summary = "Get exercise by ID",
+        description = "Retrieves a specific exercise by its unique identifier",
+        operationId = "getExerciseById"
+    )
+    @GetMapping("/{id}")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved exercise",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ExerciseSO.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Exercise not found",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content
+        )
+    })
+    ResponseEntity<ExerciseSO> getExerciseById(
+        @Parameter(
+            description = "Unique identifier of the exercise",
+            example = "1",
+            required = true
+        )
+        @PathVariable Long id
+    );
+    
+    @Operation(
+        summary = "Get all exercise categories",
+        description = "Retrieves a list of all available exercise categories",
+        operationId = "getCategories"
+    )
+    @GetMapping("/categories")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved categories",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = List.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content
+        )
+    })
+    ResponseEntity<List<String>> getCategories();
+    
+    @Operation(
         summary = "Create a new exercise",
-        description = "Creates a new exercise with the provided name and optional logo",
+        description = "Creates a new exercise with the provided details",
         operationId = "createExercise"
     )
     @PostMapping
