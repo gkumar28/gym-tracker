@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList } from 'react-native';
-import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
+import { Card, Text, Button, ActivityIndicator, IconButton } from 'react-native-paper';
 import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation';
 
 type SessionListRouteProp = {
   params?: {
@@ -12,8 +14,11 @@ type SessionListRouteProp = {
   };
 };
 
+type SessionListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SessionList'>;
+
 export default function SessionList() {
   const route = useRoute() as SessionListRouteProp;
+  const navigation = useNavigation<SessionListNavigationProp>();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
@@ -55,6 +60,12 @@ export default function SessionList() {
     });
   };
 
+  const navigateToWorkout = (workoutId?: string) => {
+    if (workoutId) {
+      navigation.navigate('WorkoutDetail', { id: workoutId });
+    }
+  };
+
   if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
   if (isError) return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
@@ -65,43 +76,57 @@ export default function SessionList() {
     </View>
   );
 
-  // Show message when no workoutId is provided
-  if (!route.params?.workoutId) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text style={{ fontSize: 18, fontWeight: '600', color: theme.text, marginBottom: 16 }}>
-          All Sessions
-        </Text>
-        <Text style={{ fontSize: 14, color: theme.textSecondary, textAlign: 'center', marginBottom: 16 }}>
-          Navigate to a workout to see its specific sessions, or select a workout from the list below.
-        </Text>
-        <Button mode="contained" onPress={() => {/* Navigate to workouts */}}>
-          View Workouts
-        </Button>
-      </View>
-    );
-  }
-
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 16 }}>
-        Sessions for Workout {route.params.workoutId}
+        {route.params?.workoutId 
+          ? `Sessions for Workout ${route.params.workoutId}`
+          : 'All Sessions'
+        }
       </Text>
       <FlatList
         data={sessions ?? []}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Card style={{ marginBottom: 8 }}>
-            <Card.Title title={`Session ${item.id}`} />
+            <Card.Title 
+              title={`Session ${item.id}`}
+              subtitle={item.workout?.name || 'Unknown Workout'}
+              right={(props) => (
+                <IconButton
+                  {...props}
+                  icon="arrow-right"
+                  onPress={() => navigateToWorkout(item.workoutId)}
+                  size={20}
+                />
+              )}
+            />
             <Card.Content>
               <Text>{new Date(item.sessionDate).toLocaleString()}</Text>
+              {item.workout && (
+                <Text style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>
+                  {item.workout.sets?.length || 0} exercises
+                </Text>
+              )}
             </Card.Content>
+            <Card.Actions>
+              <Button 
+                mode="text" 
+                onPress={() => navigateToWorkout(item.workoutId)}
+                compact
+              >
+                View Workout
+              </Button>
+            </Card.Actions>
           </Card>
         )}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', padding: 20 }}>
             <Text style={{ fontSize: 16, color: theme.textSecondary }}>
-              No sessions found for this workout
+              {route.params?.workoutId 
+                ? 'No sessions found for this workout'
+                : 'No sessions found'
+              }
             </Text>
           </View>
         }

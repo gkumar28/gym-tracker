@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList } from 'react-native';
 import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
 import WorkoutCard from '../../components/WorkoutCard';
-import { workoutService } from '../../services/workoutService';
+import { workoutService, Workout, PaginatedWorkoutResponse } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
@@ -18,7 +18,7 @@ export default function WorkoutsList() {
     showNetworkErrorScreen: true,
   });
   
-  const [workouts, setWorkouts] = useState<any[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -26,8 +26,8 @@ export default function WorkoutsList() {
     try {
       setIsLoading(true);
       setIsError(false);
-      const data = await workoutService.getWorkouts();
-      setWorkouts(data);
+      const response: PaginatedWorkoutResponse = await workoutService.searchWorkouts();
+      setWorkouts(response.items);
     } catch (err) {
       setIsError(true);
     } finally {

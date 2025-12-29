@@ -16,14 +16,41 @@ export interface Session {
   durationMinutes?: number;
 }
 
+export interface PaginatedWorkoutResponse {
+  items: Workout[];
+  total: number;
+  hasMore: boolean;
+  offset: number;
+  limit: number;
+}
+
+export interface WorkoutSearchParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  name?: string;
+  createdDateFrom?: string;
+  createdDateTo?: string;
+}
+
 export class WorkoutService {
-  // Get all workouts
-  async getWorkouts(): Promise<Workout[]> {
+  // Search workouts with pagination and filters
+  async searchWorkouts(params?: WorkoutSearchParams): Promise<PaginatedWorkoutResponse> {
     try {
-      const response = await baseApi.get('/workout');
+      const queryParams = new URLSearchParams();
+      
+      if (params?.page !== undefined) queryParams.append('page', params.page.toString());
+      if (params?.size !== undefined) queryParams.append('size', params.size.toString());
+      if (params?.sort) queryParams.append('sort', params.sort);
+      if (params?.name) queryParams.append('name', params.name);
+      if (params?.createdDateFrom) queryParams.append('createdDateFrom', params.createdDateFrom);
+      if (params?.createdDateTo) queryParams.append('createdDateTo', params.createdDateTo);
+      
+      const url = queryParams.toString() ? `/workout?${queryParams.toString()}` : '/workout';
+      const response = await baseApi.get(url);
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch workouts:', error);
+      console.error('Failed to search workouts:', error);
       throw error;
     }
   }
