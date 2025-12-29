@@ -61,6 +61,17 @@ export class WorkoutService {
     }
   }
 
+  // Get all sessions
+  async getAllSessions(): Promise<Session[]> {
+    try {
+      const response = await baseApi.get('/session');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch all sessions:', error);
+      throw error;
+    }
+  }
+
   // Create new session
   async createSession(session: Omit<Session, 'id'>): Promise<Session> {
     try {

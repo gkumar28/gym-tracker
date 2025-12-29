@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { useWorkouts, useWorkoutById } from '../../hooks/useWorkouts';
+import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
-import { baseApi } from '../../services/api';
 
 type WorkoutDetailRouteProp = {
   params: {
@@ -19,15 +18,34 @@ export default function WorkoutDetail() {
   const route = useRoute() as WorkoutDetailRouteProp;
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList, 'WorkoutDetail'>>();
   const theme = useTheme();
-  const { execute, error, reset } = useApiCall({
+  const { execute } = useApiCall({
     showNetworkErrorScreen: true,
   });
   
-  const { data: workout, isLoading, isError, refetch } = useWorkoutById(route.params.id);
+  const [workout, setWorkout] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  const loadWorkout = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const data = await workoutService.getWorkoutById(route.params.id);
+      setWorkout(data);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWorkout();
+  }, [route.params.id]);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      refetch();
+      await loadWorkout();
       return Promise.resolve();
     });
   };
@@ -43,7 +61,7 @@ export default function WorkoutDetail() {
   );
 
   if (!workout) {
-    return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>;
+    return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>
   }
 
   return (
@@ -69,6 +87,14 @@ export default function WorkoutDetail() {
 
       <Button mode="contained" onPress={() => nav.navigate('CreateWorkout')} style={{ marginTop: 12 }}>
         Edit / Create New
+      </Button>
+
+      <Button 
+        mode="outlined" 
+        onPress={() => nav.navigate('SessionList', { workoutId: route.params.id })} 
+        style={{ marginTop: 12 }}
+      >
+        View Sessions
       </Button>
     </ScrollView>
   );

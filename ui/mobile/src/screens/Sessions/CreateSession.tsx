@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import SetTable, { SetRow } from '../../components/SetTable';
-import { baseApi } from '../../services/api';
+import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -38,13 +38,13 @@ export default function CreateSession() {
     const payload = {
       workoutId: null,
       sessionExercises: [{ exerciseName, sets }],
-      sessionDate: new Date(),
+      sessionDate: new Date().toISOString(),
       durationMinutes: 30
     };
 
     setIsSaving(true);
     const result = await execute(async () => {
-      await baseApi.post('/session', payload);
+      await workoutService.createSession(payload);
       Alert.alert('Saved', 'Session created successfully');
       return true;
     });

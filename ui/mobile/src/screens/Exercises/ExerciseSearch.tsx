@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, RefreshControl, ScrollView } from 'react-native';
 import { 
   Searchbar, 
@@ -12,7 +12,7 @@ import {
   Modal,
   FAB
 } from 'react-native-paper';
-import { useExercises, Exercise, ExerciseSearchParams } from '../../hooks/useExercises';
+import { exerciseService, Exercise, ExerciseSearchParams, PaginatedExerciseResponse } from '../../services/exerciseService';
 import { useTheme } from '../../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApiCall } from '../../hooks/useApiCall';
@@ -31,6 +31,10 @@ export default function ExerciseSearch() {
     showNetworkErrorScreen: true,
   });
 
+  const [exercisesData, setExercisesData] = useState<PaginatedExerciseResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
   const categories = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'Sports'];
   const muscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Glutes'];
   const difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
@@ -45,7 +49,22 @@ export default function ExerciseSearch() {
     offset: 0,
   };
 
-  const { data: exercisesData, isLoading, error: exercisesError, refetch } = useExercises(searchParams);
+  const loadExercises = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const data = await exerciseService.searchExercises(searchParams);
+      setExercisesData(data);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadExercises();
+  }, [searchQuery, selectedCategory, selectedMuscle, selectedDifficulty]);
 
   const exercises = exercisesData?.items || [];
   const hasMore = exercisesData?.hasMore || false;
@@ -53,7 +72,7 @@ export default function ExerciseSearch() {
   const hasActiveFilters = selectedCategory || selectedMuscle || selectedDifficulty;
 
   const onRefresh = () => {
-    refetch();
+    loadExercises();
   };
 
   const clearFilters = () => {
@@ -482,7 +501,7 @@ export default function ExerciseSearch() {
           ) : null
         }
         ListEmptyComponent={
-          !isLoading ? (
+          !isLoading && !isError ? (
             <View style={{ padding: 16, alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: '600', color: theme.textSecondary }}>No exercises found</Text>
               {hasActiveFilters && (
@@ -495,6 +514,24 @@ export default function ExerciseSearch() {
         }
         contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
       />
+      
+      {isError && (
+        <View style={{ 
+          position: 'absolute', 
+          top: '50%', 
+          left: 0, 
+          right: 0, 
+          alignItems: 'center',
+          padding: 20 
+        }}>
+          <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>
+            Failed to load exercises.
+          </Text>
+          <Button mode="contained" onPress={onRefresh}>
+            Retry
+          </Button>
+        </View>
+      )}
       
       {renderFilterModal()}
       {renderExerciseDetail()}

@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList } from 'react-native';
 import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
 import WorkoutCard from '../../components/WorkoutCard';
-import { useWorkouts } from '../../hooks/useWorkouts';
+import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
@@ -12,16 +12,36 @@ import { useTheme } from '../../hooks/useTheme';
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
 export default function WorkoutsList() {
-  const { data, isLoading, isError } = useWorkouts();
   const navigation = useNavigation<NavProp>();
   const theme = useTheme();
-  const { execute, error, reset } = useApiCall({
+  const { execute } = useApiCall({
     showNetworkErrorScreen: true,
   });
+  
+  const [workouts, setWorkouts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  const loadWorkouts = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const data = await workoutService.getWorkouts();
+      setWorkouts(data);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWorkouts();
+  }, []);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      // Trigger refetch by invalidating the query
+      await loadWorkouts();
       return Promise.resolve();
     });
   };
@@ -36,12 +56,12 @@ export default function WorkoutsList() {
     </View>
   );
 
-  if (!data || data.length === 0) return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>;
+  if (!workouts || workouts.length === 0) return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>;
 
   return (
     <View style={{ flex: 1 }}>
       <FlatList
-        data={data}
+        data={workouts}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (

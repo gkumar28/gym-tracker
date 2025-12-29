@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text, Switch } from 'react-native-paper';
 import SetTable, { SetRow } from '../../components/SetTable';
-import { baseApi } from '../../services/api';
+import { workoutService } from '../../services/workoutService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useNavigation } from '@react-navigation/native';
@@ -46,7 +46,7 @@ export default function CreateWorkout() {
     setIsSaving(true);
     
     const result = await execute(async () => {
-      await baseApi.post('/workout', payload);
+      await workoutService.createWorkout(payload);
       Alert.alert('Saved', 'Workout created successfully');
       navigation.navigate('WorkoutsList');
       return true;
