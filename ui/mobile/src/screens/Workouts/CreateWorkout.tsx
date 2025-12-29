@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text, Switch } from 'react-native-paper';
 import SetTable, { SetRow } from '../../components/SetTable';
-import { api } from '../../services/api';
+import { exerciseApi } from '../../services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useNavigation } from '@react-navigation/native';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function CreateWorkout() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'CreateWorkout'>>();
+  const theme = useTheme();
+  const { execute } = useApiCall({
+    showNetworkErrorScreen: true,
+  });
   const [name, setName] = useState<string>('');
   const [rows, setRows] = useState<SetRow[]>([{ name: 'Set 1', reps: 8, weight: 50, restSec: 0, isRest: false }]);
   const [showRestRows, setShowRestRows] = useState(true);
@@ -38,16 +44,15 @@ export default function CreateWorkout() {
     const payload = { name, sets };
     console.log('Saving payload', payload);
     setIsSaving(true);
-    try {
-      // await api.post('/api/workout', payload);
+    
+    const result = await execute(async () => {
+      // await exerciseApi.post('/api/workout', payload);
       Alert.alert('Saved', 'Workout payload prepared (see console).');
       navigation.navigate('WorkoutsList');
-    } catch (error) {
-      console.error('Failed to save', error);
-      Alert.alert('Error', 'Failed to save workout.');
-    } finally {
-      setIsSaving(false);
-    }
+      return true;
+    });
+    
+    setIsSaving(false);
   };
 
   return (

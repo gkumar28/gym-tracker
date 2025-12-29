@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, Card, Button } from 'react-native-paper';
+import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useWorkouts } from '../../hooks/useWorkouts';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useTheme } from '../../hooks/useTheme';
 
 type WorkoutDetailRouteProp = {
   params: {
@@ -15,12 +17,33 @@ type WorkoutDetailRouteProp = {
 export default function WorkoutDetail() {
   const route = useRoute() as WorkoutDetailRouteProp;
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList, 'WorkoutDetail'>>();
-  const { data } = useWorkouts();
+  const theme = useTheme();
+  const { execute, error, reset } = useApiCall({
+    showNetworkErrorScreen: true,
+  });
+  const { data, isLoading, isError, refetch } = useWorkouts();
+
+  const handleRefresh = async () => {
+    await execute(async () => {
+      refetch();
+      return Promise.resolve();
+    });
+  };
+
+  if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
+  if (isError) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load workout details.</Text>
+      <Button mode="contained" onPress={handleRefresh}>
+        Retry
+      </Button>
+    </View>
+  );
 
   const workout = data?.find((w) => w.id === route.params.id);
 
   if (!workout) {
-    return <Text style={{ padding: 16 }}>Workout not found</Text>;
+    return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>;
   }
 
   return (

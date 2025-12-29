@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import SetTable, { SetRow } from '../../components/SetTable';
-import { api } from '../../services/api';
+import { exerciseApi } from '../../services/api';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function CreateSession() {
+  const theme = useTheme();
+  const { execute } = useApiCall({
+    showNetworkErrorScreen: true,
+  });
   const [exerciseName, setExerciseName] = useState('Bench Press');
   const [rows, setRows] = useState<SetRow[]>([{ name: 'Set 1', reps: 8, weight: 50, restSec: 0 }]);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,15 +43,12 @@ export default function CreateSession() {
     };
 
     setIsSaving(true);
-    try {
-      await api.post('/api/session', payload);
+    const result = await execute(async () => {
+      await exerciseApi.post('/api/session', payload);
       Alert.alert('Saved', 'Session created');
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Failed to save session');
-    } finally {
-      setIsSaving(false);
-    }
+      return true;
+    });
+    setIsSaving(false);
   };
 
   return (

@@ -1,16 +1,41 @@
 import React from 'react';
 import { View, FlatList } from 'react-native';
-import { Card, Text } from 'react-native-paper';
-import { api } from '../../services/api';
+import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
+import { exerciseApi } from '../../services/api';
 import { useQuery } from '@tanstack/react-query';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function SessionList() {
-  const { data, isLoading } = useQuery(['sessions'], async () => {
-    const res = await api.get('/api/session/workout/1');
-    return res.data;
+  const theme = useTheme();
+  const { execute, error, reset } = useApiCall({
+    showNetworkErrorScreen: true,
   });
 
-  if (isLoading) return <Text style={{ padding: 16 }}>Loading sessions...</Text>;
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['sessions'],
+    queryFn: async () => {
+      const res = await exerciseApi.get('/api/session/workout/1');
+      return res.data;
+    },
+  });
+
+  const handleRefresh = async () => {
+    await execute(async () => {
+      refetch();
+      return Promise.resolve();
+    });
+  };
+
+  if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
+  if (isError) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load sessions.</Text>
+      <Button mode="contained" onPress={handleRefresh}>
+        Retry
+      </Button>
+    </View>
+  );
 
   return (
     <View style={{ padding: 16 }}>

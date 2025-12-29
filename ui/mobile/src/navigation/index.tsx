@@ -9,12 +9,14 @@ import CreateWorkout from '../screens/Workouts/CreateWorkout';
 import SessionList from '../screens/Sessions/SessionList';
 import CreateSession from '../screens/Sessions/CreateSession';
 import ExerciseSearch from '../screens/Exercises/ExerciseSearch';
+import { ErrorScreen } from '../screens/ErrorScreen';
 
 export type RootStackParamList = {
   Home: undefined;
   WorkoutsList: undefined;
   WorkoutDetail: { id: string };
   CreateWorkout: undefined;
+  Error: { error?: string };
 };
 
 export type RootTabParamList = {
@@ -33,6 +35,7 @@ function WorkoutsStack() {
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts' }} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout' }} />
       <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout' }} />
+      <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />
     </Stack.Navigator>
   );
 }

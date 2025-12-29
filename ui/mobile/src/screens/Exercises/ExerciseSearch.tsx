@@ -12,10 +12,10 @@ import {
   Modal,
   FAB
 } from 'react-native-paper';
-import { exerciseService } from '../../services/exerciseService';
-import { Exercise, ExerciseSearchParams } from '../../types/exercise';
+import { exerciseService, Exercise, ExerciseSearchParams } from '../../services/exerciseService';
 import { useTheme } from '../../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useApiCall } from '../../hooks/useApiCall';
 
 export default function ExerciseSearch() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,20 +32,23 @@ export default function ExerciseSearch() {
   
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { execute, error, reset } = useApiCall({
+    showNetworkErrorScreen: true,
+  });
   
   const categories = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'Sports'];
   const muscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Glutes'];
-  const difficulties = ['beginner', 'intermediate', 'advanced'];
+  const difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
   
   const loadExercises = useCallback(async (reset: boolean = false) => {
     if (loading) return;
     
     setLoading(true);
-    try {
+    const result = await execute(async () => {
       const params: ExerciseSearchParams = {
-        searchTerm: searchQuery || undefined,
+        search: searchQuery || undefined,
         category: selectedCategory || undefined,
-        muscleGroup: selectedMuscle || undefined,
+        muscle: selectedMuscle || undefined,
         difficulty: selectedDifficulty || undefined,
         limit: 10,
         offset: reset ? 0 : offset,
@@ -54,21 +57,28 @@ export default function ExerciseSearch() {
       const response = await exerciseService.searchExercises(params);
       
       if (reset) {
-        setExercises(response.exercises);
-        setOffset(response.exercises.length);
+        setExercises(response.items);
+        setOffset(response.items.length);
       } else {
-        setExercises(prev => [...prev, ...response.exercises]);
-        setOffset(prev => prev + response.exercises.length);
+        setExercises(prev => [...prev, ...response.items]);
+        setOffset(prev => prev + response.items.length);
       }
       
       setHasMore(response.hasMore);
-    } catch (error) {
-      console.error('Error loading exercises:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      return response;
+    });
+    
+    if (!result) {
+      // Error was handled by useApiCall hook
+      if (reset) {
+        setExercises([]);
+        setOffset(0);
+      }
     }
-  }, [searchQuery, selectedCategory, selectedMuscle, selectedDifficulty, offset, loading]);
+    
+    setLoading(false);
+    setRefreshing(false);
+  }, [loading, searchQuery, selectedCategory, selectedMuscle, selectedDifficulty, offset, execute]);
   
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -163,16 +173,16 @@ export default function ExerciseSearch() {
             </View>
           </View>
           <Chip 
-            mode={item.difficulty === 'beginner' ? 'flat' : 'outlined'}
+            mode={item.difficulty === 'BEGINNER' ? 'flat' : 'outlined'}
             compact
             style={{ 
               marginLeft: 8,
-              backgroundColor: item.difficulty === 'beginner' ? theme.success + '20' : 'transparent',
-              borderColor: item.difficulty === 'intermediate' ? theme.warning : item.difficulty === 'advanced' ? theme.error : theme.success,
+              backgroundColor: item.difficulty === 'BEGINNER' ? theme.success + '20' : 'transparent',
+              borderColor: item.difficulty === 'INTERMEDIATE' ? theme.warning : item.difficulty === 'ADVANCED' ? theme.error : theme.success,
               borderWidth: 1
             }}
             textStyle={{ 
-              color: item.difficulty === 'beginner' ? theme.success : item.difficulty === 'intermediate' ? theme.warning : theme.error 
+              color: item.difficulty === 'BEGINNER' ? theme.success : item.difficulty === 'INTERMEDIATE' ? theme.warning : theme.error 
             }}
           >
             {item.difficulty}
@@ -329,17 +339,17 @@ export default function ExerciseSearch() {
                 {selectedExercise.category}
               </Chip>
               <Chip 
-                mode={selectedExercise.difficulty === 'beginner' ? 'flat' : 'outlined'}
+                mode={selectedExercise.difficulty === 'BEGINNER' ? 'flat' : 'outlined'}
                 compact 
                 style={{ 
                   marginRight: 4, 
                   marginBottom: 4,
-                  backgroundColor: selectedExercise.difficulty === 'beginner' ? theme.success + '20' : 'transparent',
-                  borderColor: selectedExercise.difficulty === 'intermediate' ? theme.warning : selectedExercise.difficulty === 'advanced' ? theme.error : theme.success,
+                  backgroundColor: selectedExercise.difficulty === 'BEGINNER' ? theme.success + '20' : 'transparent',
+                  borderColor: selectedExercise.difficulty === 'INTERMEDIATE' ? theme.warning : selectedExercise.difficulty === 'ADVANCED' ? theme.error : theme.success,
                   borderWidth: 1
                 }}
                 textStyle={{ 
-                  color: selectedExercise.difficulty === 'beginner' ? theme.success : selectedExercise.difficulty === 'intermediate' ? theme.warning : theme.error 
+                  color: selectedExercise.difficulty === 'BEGINNER' ? theme.success : selectedExercise.difficulty === 'INTERMEDIATE' ? theme.warning : theme.error 
                 }}
               >
                 {selectedExercise.difficulty}
@@ -509,7 +519,7 @@ export default function ExerciseSearch() {
       <FlatList
         data={exercises}
         renderItem={renderExerciseItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -525,7 +535,7 @@ export default function ExerciseSearch() {
         ListEmptyComponent={
           !loading ? (
             <View style={{ padding: 16, alignItems: 'center' }}>
-              <Text style={{ color: theme.textSecondary }}>No exercises found</Text>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: theme.textSecondary }}>No exercises found</Text>
               {hasActiveFilters && (
                 <Button mode="outlined" onPress={clearFilters} style={{ marginTop: 8 }}>
                   Clear Filters

@@ -2,6 +2,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { ConfigProvider } from '../config/configProvider';
 import { API_CONSTANTS } from '../constants/constants';
+import { NetworkErrorHandler } from '../utils/networkErrorHandler';
 
 const config = ConfigProvider.getInstance();
 
@@ -37,7 +38,13 @@ exerciseApi.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    // Retry logic
+    // Check if it's a network error
+    if (NetworkErrorHandler.isNetworkError(error)) {
+      console.log('🚫 Network error detected:', NetworkErrorHandler.getErrorMessage(error));
+      return Promise.reject(error);
+    }
+    
+    // Retry logic for non-network errors
     if (!originalRequest._retry && originalRequest._retryCount < config.getApiConfig().retryAttempts) {
       originalRequest._retry = true;
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;

@@ -15,6 +15,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RootTabParamList } from '../navigation';
 import { useTheme } from '../hooks/useTheme';
 import { useDeviceType, useResponsiveValue, responsiveConfig } from '../hooks/useResponsive';
+import { useApiCall } from '../hooks/useApiCall';
 
 type HomeNavProp = BottomTabNavigationProp<RootTabParamList, 'Home'>;
 
@@ -23,6 +24,9 @@ export default function HomeScreen() {
   const theme = useTheme();
   const deviceType = useDeviceType();
   const { width } = Dimensions.get('window');
+  const { execute, error, reset } = useApiCall({
+    showNetworkErrorScreen: true,
+  });
 
   // Responsive values
   const padding = useResponsiveValue({
