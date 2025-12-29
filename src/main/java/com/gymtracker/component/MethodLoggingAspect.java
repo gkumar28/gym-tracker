@@ -3,7 +3,6 @@ package com.gymtracker.component;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ public class MethodLoggingAspect {
     }
 
     // Track individual service method times
-    @Around("execution(* com.gymtracker.service.impl.*.*(..))")
+    @Around("execution(* com.gymtracker.service.*.*(..))")
     public Object logServiceTiming(ProceedingJoinPoint pjp) throws Throwable {
         long start = System.nanoTime();
         String methodName = pjp.getSignature().toShortString();
@@ -55,12 +54,12 @@ public class MethodLoggingAspect {
         }
     }
 
-    // Track custom repository method times
-    @Around("execution(* com.gymtracker.repository.impl.*.*(..))")
-    public Object logCustomRepositoryTiming(ProceedingJoinPoint pjp) throws Throwable {
+    // track Repository method times
+    @Around("target(org.springframework.data.repository.CrudRepository)")
+    public Object logJpaRepositoryTiming(ProceedingJoinPoint pjp) throws Throwable {
         long start = System.nanoTime();
+        
         String methodName = pjp.getSignature().toShortString();
-
         if (log.isTraceEnabled()) {
             log.trace("→ REPOSITORY: {}", methodName);
         }
@@ -71,32 +70,7 @@ public class MethodLoggingAspect {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 
             if (log.isTraceEnabled()) {
-                log.trace("← REPOSITORY: {} with total time: {} ms)", methodName, durationMs);
-            }
-        }
-    }
-
-    // track JpaRepository method times
-    @Around("execution(* org.springframework.data.jpa.repository.support.SimpleJpaRepository.*(..))")
-    public Object logJpaRepositoryTiming(ProceedingJoinPoint pjp) throws Throwable {
-        long start = System.nanoTime();
-        
-        Object target = pjp.getTarget();
-        Class<?> entityClass = GenericTypeResolver.resolveTypeArguments(
-            target.getClass(), 
-        org.springframework.data.jpa.repository.JpaRepository.class)[0];
-        String methodName = entityClass.getSimpleName() + "." + pjp.getSignature().getName() + "(..)";
-        if (log.isTraceEnabled()) {
-            log.trace("→ JPA-REPOSITORY: {}", methodName);
-        }
-
-        try {
-            return pjp.proceed();
-        } finally {
-            long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-
-            if (log.isTraceEnabled()) {
-                log.trace("← JPA-REPOSITORY: {} with total time: {} ms)", methodName, durationMs);
+                log.trace("← REPOSITORY: {} with total time: {} ms", methodName, durationMs);
             }
         }
     }
