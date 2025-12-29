@@ -172,6 +172,41 @@ public interface WorkoutApi {
     );
     
     @Operation(
+        summary = "Get workout by ID",
+        description = "Retrieves a specific workout by its unique identifier",
+        operationId = "getWorkoutById"
+    )
+    @GetMapping("/{id}")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved workout",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = WorkoutSO.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Workout not found",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content
+        )
+    })
+    ResponseEntity<WorkoutSO> getWorkoutById(
+        @Parameter(
+            description = "Unique identifier of the workout",
+            example = "1",
+            required = true
+        )
+        @PathVariable Long id
+    );
+    
+    @Operation(
         summary = "Create workout from template",
         description = "Creates a new workout based on an existing template. " +
                      "All exercises and sets from the template are copied to the new workout.",

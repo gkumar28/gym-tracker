@@ -44,6 +44,14 @@ public class SessionServiceImpl implements SessionService {
     
     @Override
     @Transactional(readOnly = true)
+    public SessionSO getSessionById(Long id) {
+        Session session = sessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Session not found with id: " + id));
+        return SessionMapper.toSO(session);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
     public List<SessionSO> getAllSessionsByWorkoutId(Long workoutId) {
         List<Session> sessions = sessionRepository.findByWorkoutIdOrderBySessionDateDesc(workoutId);
         return SessionMapper.toSOList(sessions);

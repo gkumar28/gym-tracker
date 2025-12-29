@@ -28,6 +28,12 @@ public class SessionApiController implements SessionApi {
     }
     
     @Override
+    public ResponseEntity<SessionSO> getSessionById(Long id) {
+        SessionSO session = sessionService.getSessionById(id);
+        return ResponseEntity.ok(session);
+    }
+    
+    @Override
     public ResponseEntity<List<SessionSO>> getAllSessionsByWorkoutId(Long workoutId) {
         List<SessionSO> sessions = sessionService.getAllSessionsByWorkoutId(workoutId);
         return ResponseEntity.ok(sessions);

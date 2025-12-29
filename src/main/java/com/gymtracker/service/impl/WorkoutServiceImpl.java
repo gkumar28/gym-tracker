@@ -75,6 +75,14 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
     
     @Override
+    @Transactional(readOnly = true)
+    public WorkoutSO getWorkoutById(Long id) {
+        Workout workout = workoutRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Workout not found with id: " + id));
+        return WorkoutMapper.toSO(workout);
+    }
+    
+    @Override
     @Transactional
     public WorkoutSO createWorkoutFromTemplate(Long templateId, String workoutName) {
         Template template = templateRepository.findById(templateId)

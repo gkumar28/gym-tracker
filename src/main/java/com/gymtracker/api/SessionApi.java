@@ -99,6 +99,41 @@ public interface SessionApi {
     );
     
     @Operation(
+        summary = "Get session by ID",
+        description = "Retrieves a specific session by its unique identifier",
+        operationId = "getSessionById"
+    )
+    @GetMapping("/{id}")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved session",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = SessionSO.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Session not found",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content
+        )
+    })
+    ResponseEntity<SessionSO> getSessionById(
+        @Parameter(
+            description = "Unique identifier of the session",
+            example = "1",
+            required = true
+        )
+        @PathVariable Long id
+    );
+    
+    @Operation(
         summary = "Get all sessions for a workout",
         description = "Retrieves all sessions for a specific workout, ordered by session date (most recent first)",
         operationId = "getAllSessionsByWorkoutId"

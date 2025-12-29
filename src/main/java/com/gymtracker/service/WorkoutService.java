@@ -14,6 +14,8 @@ public interface WorkoutService {
     
     WorkoutSO updateWorkout(Long id, WorkoutSO workoutSO);
     
+    WorkoutSO getWorkoutById(Long id);
+    
     WorkoutSO createWorkoutFromTemplate(Long templateId, String workoutName);
 }
 

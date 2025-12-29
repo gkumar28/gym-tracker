@@ -40,6 +40,12 @@ public class WorkoutApiController implements WorkoutApi {
     }
     
     @Override
+    public ResponseEntity<WorkoutSO> getWorkoutById(Long id) {
+        WorkoutSO workout = workoutService.getWorkoutById(id);
+        return ResponseEntity.ok(workout);
+    }
+    
+    @Override
     public ResponseEntity<WorkoutSO> createWorkoutFromTemplate(Long templateId, String workoutName) {
         WorkoutSO createdWorkout = workoutService.createWorkoutFromTemplate(templateId, workoutName);
         return ResponseEntity.status(201).body(createdWorkout);

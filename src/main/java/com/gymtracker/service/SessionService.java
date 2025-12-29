@@ -10,6 +10,8 @@ public interface SessionService {
     
     SessionSO getLastSessionByWorkoutId(Long workoutId);
     
+    SessionSO getSessionById(Long id);
+    
     List<SessionSO> getAllSessionsByWorkoutId(Long workoutId);
 }
 
