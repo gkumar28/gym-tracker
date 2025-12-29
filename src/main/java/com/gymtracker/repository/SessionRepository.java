@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SessionRepository extends JpaRepository<Session, Long> {
+public interface SessionRepository extends JpaRepository<Session, Long>, SessionRepositoryCustom {
     
     List<Session> findByWorkoutIdOrderBySessionDateDesc(Long workoutId);
     

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class ExerciseRepositoryImpl implements ExerciseRepositoryCustom {
+public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;

@@ -1,6 +1,7 @@
 package com.gymtracker.controller;
 
 import com.gymtracker.api.SessionApi;
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.SessionSO;
 import com.gymtracker.service.SessionService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,12 @@ public class SessionApiController implements SessionApi {
     @Override
     public ResponseEntity<List<SessionSO>> getAllSessionsByWorkoutId(Long workoutId) {
         List<SessionSO> sessions = sessionService.getAllSessionsByWorkoutId(workoutId);
+        return ResponseEntity.ok(sessions);
+    }
+    
+    @Override
+    public ResponseEntity<PaginatedResponse<SessionSO>> getAllSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo) {
+        PaginatedResponse<SessionSO> sessions = sessionService.getAllSessions(page, size, sort, workoutId, sessionDateFrom, sessionDateTo);
         return ResponseEntity.ok(sessions);
     }
 }

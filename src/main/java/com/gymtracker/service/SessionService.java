@@ -1,5 +1,6 @@
 package com.gymtracker.service;
 
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.SessionSO;
 
 import java.util.List;
@@ -13,5 +14,6 @@ public interface SessionService {
     SessionSO getSessionById(Long id);
     
     List<SessionSO> getAllSessionsByWorkoutId(Long workoutId);
+    
+    PaginatedResponse<SessionSO> getAllSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo);
 }
-
