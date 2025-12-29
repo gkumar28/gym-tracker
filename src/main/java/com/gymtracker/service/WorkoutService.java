@@ -1,14 +1,11 @@
 package com.gymtracker.service;
 
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
-
-import java.util.List;
 
 public interface WorkoutService {
     
-    List<WorkoutSO> getAllWorkouts();
-    
-    List<WorkoutSO> searchWorkouts(String searchTerm);
+    PaginatedResponse<WorkoutSO> searchWorkouts(Integer page, Integer size, String sort, String name, String createdDateFrom, String createdDateTo);
     
     WorkoutSO createWorkout(WorkoutSO workoutSO);
     

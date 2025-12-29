@@ -1,5 +1,6 @@
 package com.gymtracker.service.impl;
 
+import com.gymtracker.constants.AppConstants;
 import com.gymtracker.entity.Template;
 import com.gymtracker.entity.Workout;
 import com.gymtracker.entity.WorkoutExercise;
@@ -7,6 +8,7 @@ import com.gymtracker.mapper.WorkoutExerciseMapper;
 import com.gymtracker.mapper.WorkoutMapper;
 import com.gymtracker.repository.TemplateRepository;
 import com.gymtracker.repository.WorkoutRepository;
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
 import com.gymtracker.service.WorkoutService;
 import lombok.RequiredArgsConstructor;
@@ -26,21 +28,36 @@ public class WorkoutServiceImpl implements WorkoutService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<WorkoutSO> getAllWorkouts() {
-        List<Workout> workouts = workoutRepository.findAll();
-        return WorkoutMapper.toSOList(workouts);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<WorkoutSO> searchWorkouts(String searchTerm) {
-        List<Workout> workouts;
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            workouts = workoutRepository.findAll();
-        } else {
-            workouts = workoutRepository.searchByName(searchTerm.trim());
-        }
-        return WorkoutMapper.toSOList(workouts);
+    public PaginatedResponse<WorkoutSO> searchWorkouts(Integer page, Integer size, String sort, String name, String createdDateFrom, String createdDateTo) {
+        // Validate and apply defaults
+        int validatedPage = (page != null && page >= 0) ? page : AppConstants.DEFAULT_PAGE_NUMBER;
+        int validatedSize = (size != null && size > 0 && size <= AppConstants.MAX_PAGE_SIZE) 
+                ? size : AppConstants.DEFAULT_PAGE_SIZE;
+        
+        // Calculate offset
+        int offset = validatedPage * validatedSize;
+        
+        // Fetch filtered data
+        List<Workout> workouts = workoutRepository.searchWorkouts(
+            name, createdDateFrom, createdDateTo, validatedSize, offset
+        );
+        
+        // Count total results
+        Long total = workoutRepository.countWorkouts(
+            name, createdDateFrom, createdDateTo
+        );
+        
+        // OPTIMIZED: Use mapper method that skips nested data to avoid N+1 queries
+        List<WorkoutSO> workoutSOs = WorkoutMapper.toSOListWithoutNestedData(workouts);
+        
+        // Build response using existing PaginatedResponse structure
+        return new PaginatedResponse<>(
+            workoutSOs,
+            total,
+            (offset + validatedSize) < total, // hasMore
+            offset, // offset
+            validatedSize // limit
+        );
     }
     
     @Override

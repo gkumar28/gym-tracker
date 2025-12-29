@@ -1,13 +1,12 @@
 package com.gymtracker.controller;
 
 import com.gymtracker.api.WorkoutApi;
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
 import com.gymtracker.service.WorkoutService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,14 +15,8 @@ public class WorkoutApiController implements WorkoutApi {
     private final WorkoutService workoutService;
     
     @Override
-    public ResponseEntity<List<WorkoutSO>> getAllWorkouts() {
-        List<WorkoutSO> workouts = workoutService.getAllWorkouts();
-        return ResponseEntity.ok(workouts);
-    }
-    
-    @Override
-    public ResponseEntity<List<WorkoutSO>> searchWorkouts(String searchTerm) {
-        List<WorkoutSO> workouts = workoutService.searchWorkouts(searchTerm);
+    public ResponseEntity<PaginatedResponse<WorkoutSO>> searchWorkouts(Integer page, Integer size, String sort, String name, String createdDateFrom, String createdDateTo) {
+        PaginatedResponse<WorkoutSO> workouts = workoutService.searchWorkouts(page, size, sort, name, createdDateFrom, createdDateTo);
         return ResponseEntity.ok(workouts);
     }
     

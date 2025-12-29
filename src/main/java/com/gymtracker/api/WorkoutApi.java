@@ -1,5 +1,6 @@
 package com.gymtracker.api;
 
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 @Tag(
     name = "Workout API",
     description = "API endpoints for managing and searching workouts"
@@ -28,9 +27,9 @@ import java.util.List;
 public interface WorkoutApi {
     
     @Operation(
-        summary = "Get all workouts",
-        description = "Retrieves all workouts",
-        operationId = "getAllWorkouts"
+        summary = "Search workouts with pagination and filters",
+        description = "Searches for workouts with pagination support and optional filters. Results are ordered by creation date (most recent first).",
+        operationId = "searchWorkouts"
     )
     @GetMapping
     @ApiResponses(value = {
@@ -39,31 +38,7 @@ public interface WorkoutApi {
             description = "Successfully retrieved workouts",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = WorkoutSO.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content
-        )
-    })
-    ResponseEntity<List<WorkoutSO>> getAllWorkouts();
-    
-    @Operation(
-        summary = "Search workouts by name",
-        description = "Searches for workouts by name using case-insensitive LIKE search. " +
-                     "Returns all workouts if no search term is provided.",
-        operationId = "searchWorkouts"
-    )
-    @GetMapping("/search")
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved workouts",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = WorkoutSO.class)
+                schema = @Schema(implementation = PaginatedResponse.class)
             )
         ),
         @ApiResponse(
@@ -77,15 +52,48 @@ public interface WorkoutApi {
             content = @Content
         )
     })
-    ResponseEntity<List<WorkoutSO>> searchWorkouts(
+    ResponseEntity<PaginatedResponse<WorkoutSO>> searchWorkouts(
         @Parameter(
-            description = "Search term to match workout names (case-insensitive). " +
-                         "If empty or not provided, returns all workouts.",
-            example = "chest",
-            required = false,
-            schema = @Schema(type = "string", example = "chest")
+            description = "Page number (0-based)",
+            example = "0",
+            required = false
         )
-        @RequestParam(required = false, defaultValue = "") String searchTerm
+        @RequestParam(defaultValue = "0") Integer page,
+        
+        @Parameter(
+            description = "Number of items per page",
+            example = "20",
+            required = false
+        )
+        @RequestParam(defaultValue = "20") Integer size,
+        
+        @Parameter(
+            description = "Sort field and direction (format: field,direction)",
+            example = "createdAt,desc",
+            required = false
+        )
+        @RequestParam(defaultValue = "createdAt,desc") String sort,
+        
+        @Parameter(
+            description = "Filter by workout name (case-insensitive search)",
+            example = "chest",
+            required = false
+        )
+        @RequestParam(required = false) String name,
+        
+        @Parameter(
+            description = "Filter workouts created from this date (format: yyyy-MM-dd HH:mm:ss)",
+            example = "2024-01-01 00:00:00",
+            required = false
+        )
+        @RequestParam(required = false) String createdDateFrom,
+        
+        @Parameter(
+            description = "Filter workouts created to this date (format: yyyy-MM-dd HH:mm:ss)",
+            example = "2024-12-31 23:59:59",
+            required = false
+        )
+        @RequestParam(required = false) String createdDateTo
     );
     
     @Operation(

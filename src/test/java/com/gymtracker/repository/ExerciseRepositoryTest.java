@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
+@Transactional
 class ExerciseRepositoryTest {
 
     @Autowired
@@ -47,14 +49,20 @@ class ExerciseRepositoryTest {
         Exercise exercise1 = new Exercise();
         exercise1.setName("Bench Press");
         exercise1.setLogo("logo1.png");
+        exercise1.setCategory("Strength");
+        exercise1.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         
         Exercise exercise2 = new Exercise();
         exercise2.setName("Squat Bench");
         exercise2.setLogo("logo2.png");
+        exercise2.setCategory("Strength");
+        exercise2.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         
         Exercise exercise3 = new Exercise();
         exercise3.setName("Deadlift");
         exercise3.setLogo("logo3.png");
+        exercise3.setCategory("Strength");
+        exercise3.setDifficulty(Exercise.Difficulty.ADVANCED);
 
         entityManager.persistAndFlush(exercise1);
         entityManager.persistAndFlush(exercise2);
@@ -70,29 +78,34 @@ class ExerciseRepositoryTest {
     @Test
     void testSearchByName_CaseInsensitive() {
         Exercise exercise = new Exercise();
-        exercise.setName("Bench Press");
+        exercise.setName("Bench Press Case Test");
         exercise.setLogo("logo.png");
+        exercise.setCategory("Strength");
+        exercise.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         entityManager.persistAndFlush(exercise);
 
         List<Exercise> results = exerciseRepository.searchByName("BENCH");
 
         assertEquals(1, results.size());
-        assertEquals("Bench Press", results.get(0).getName());
+        assertEquals("Bench Press Case Test", results.get(0).getName());
     }
 
     @Test
     void testFindAllCategories() {
         Exercise exercise1 = new Exercise();
-        exercise1.setName("Bench Press");
+        exercise1.setName("Bench Press Category Test");
         exercise1.setCategory("Strength");
+        exercise1.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         
         Exercise exercise2 = new Exercise();
-        exercise2.setName("Running");
+        exercise2.setName("Running Category Test");
         exercise2.setCategory("Cardio");
+        exercise2.setDifficulty(Exercise.Difficulty.BEGINNER);
         
         Exercise exercise3 = new Exercise();
-        exercise3.setName("Stretching");
+        exercise3.setName("Stretching Category Test");
         exercise3.setCategory("Flexibility");
+        exercise3.setDifficulty(Exercise.Difficulty.BEGINNER);
 
         entityManager.persistAndFlush(exercise1);
         entityManager.persistAndFlush(exercise2);
@@ -181,12 +194,16 @@ class ExerciseRepositoryTest {
     @Test
     void testFindAll() {
         Exercise exercise1 = new Exercise();
-        exercise1.setName("Bench Press");
+        exercise1.setName("Bench Press Find All Test");
         exercise1.setLogo("logo1.png");
+        exercise1.setCategory("Strength");
+        exercise1.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         
         Exercise exercise2 = new Exercise();
-        exercise2.setName("Squat");
+        exercise2.setName("Squat Find All Test");
         exercise2.setLogo("logo2.png");
+        exercise2.setCategory("Strength");
+        exercise2.setDifficulty(Exercise.Difficulty.ADVANCED);
 
         entityManager.persistAndFlush(exercise1);
         entityManager.persistAndFlush(exercise2);

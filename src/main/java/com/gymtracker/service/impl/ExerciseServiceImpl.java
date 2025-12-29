@@ -34,7 +34,8 @@ public class ExerciseServiceImpl implements ExerciseService {
         Long total = exerciseRepository.countExercises(
             search, category, muscle, equipment, difficulty);
         
-        List<ExerciseSO> exerciseSOs = ExerciseMapper.toSOList(exercises);
+        // OPTIMIZED: Use mapper method that skips nested data to avoid N+1 queries
+        List<ExerciseSO> exerciseSOs = ExerciseMapper.toSOListWithoutNestedData(exercises);
         
         boolean hasMore = (offset + limit) < total;
         

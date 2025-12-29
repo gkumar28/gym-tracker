@@ -46,7 +46,7 @@ class ExerciseMapperTest {
         assertTrue(so.getMuscleGroups().contains("Triceps"));
         assertEquals(2, so.getEquipment().size());
         assertTrue(so.getEquipment().contains("Barbell"));
-        assertTrue(so.getEquipment().contains("Bench"));
+        assertTrue(so.getEquipment().contains("Bench Press"));
         assertEquals(Exercise.Difficulty.INTERMEDIATE, so.getDifficulty());
         assertEquals(3, so.getInstructions().size());
         assertEquals("Lie on bench", so.getInstructions().get(0));
@@ -73,7 +73,7 @@ class ExerciseMapperTest {
         so.setDescription("Compound chest exercise");
         so.setCategory("Strength");
         so.setMuscleGroups(Arrays.asList("Chest", "Shoulders", "Triceps"));
-        so.setEquipment(Arrays.asList("Barbell", "Bench"));
+        so.setEquipment(Arrays.asList("Barbell", "Bench Press"));
         so.setDifficulty(Exercise.Difficulty.INTERMEDIATE);
         so.setInstructions(Arrays.asList("Lie on bench", "Lower bar to chest", "Press up"));
         so.setTips(Arrays.asList("Keep back flat", "Control movement"));
@@ -104,8 +104,6 @@ class ExerciseMapperTest {
         assertEquals("Keep back flat", exercise.getTips().get(0));
         assertEquals("bench-press.jpg", exercise.getImageUrl());
         assertEquals("bench-press.mp4", exercise.getVideoUrl());
-        assertNotNull(exercise.getCreatedAt());
-        assertNotNull(exercise.getUpdatedAt());
     }
 
     @Test

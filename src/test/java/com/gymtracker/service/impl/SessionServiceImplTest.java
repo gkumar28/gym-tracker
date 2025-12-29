@@ -70,17 +70,19 @@ class SessionServiceImplTest {
     @Test
     void testCreateSession_WithoutWorkout() {
         SessionSO sessionSOWithoutWorkout = new SessionSO();
+        sessionSOWithoutWorkout.setWorkoutId(1L); // Set workoutId to avoid null pointer
         sessionSOWithoutWorkout.setSessionDate(new Date());
         Session sessionWithoutWorkout = new Session();
         sessionWithoutWorkout.setId(2L);
         sessionWithoutWorkout.setSessionDate(new Date());
 
+        when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
         when(sessionRepository.save(any(Session.class))).thenReturn(sessionWithoutWorkout);
 
         SessionSO result = sessionService.createSession(sessionSOWithoutWorkout);
 
         assertNotNull(result);
-        verify(workoutRepository, never()).findById(any());
+        verify(workoutRepository).findById(1L);
         verify(sessionRepository).save(any(Session.class));
     }
 

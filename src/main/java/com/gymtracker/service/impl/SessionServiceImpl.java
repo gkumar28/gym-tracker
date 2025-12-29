@@ -77,7 +77,8 @@ public class SessionServiceImpl implements SessionService {
             workoutId, sessionDateFrom, sessionDateTo
         );
         
-        List<SessionSO> sessionSOs = SessionMapper.toSOList(sessions);
+        // OPTIMIZED: Use mapper method that skips nested data to avoid N+1 queries
+        List<SessionSO> sessionSOs = SessionMapper.toSOListWithoutNestedData(sessions);
         
         // Build response using existing PaginatedResponse structure
         return new PaginatedResponse<>(

@@ -1,5 +1,6 @@
 package com.gymtracker.controller;
 
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
 import com.gymtracker.service.WorkoutService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,30 +37,17 @@ class WorkoutApiControllerTest {
     }
 
     @Test
-    void testGetAllWorkouts() {
-        List<WorkoutSO> workouts = Arrays.asList(workoutSO);
-        when(workoutService.getAllWorkouts()).thenReturn(workouts);
-
-        ResponseEntity<List<WorkoutSO>> response = workoutApiController.getAllWorkouts();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        verify(workoutService).getAllWorkouts();
-    }
-
-    @Test
     void testSearchWorkouts() {
-        String searchTerm = "chest";
         List<WorkoutSO> workouts = Arrays.asList(workoutSO);
-        when(workoutService.searchWorkouts(searchTerm)).thenReturn(workouts);
+        PaginatedResponse<WorkoutSO> paginatedResponse = new PaginatedResponse<>(workouts, 1L, false, 0, 20);
+        when(workoutService.searchWorkouts(0, 20, "createdAt,desc", null, null, null)).thenReturn(paginatedResponse);
 
-        ResponseEntity<List<WorkoutSO>> response = workoutApiController.searchWorkouts(searchTerm);
+        ResponseEntity<PaginatedResponse<WorkoutSO>> response = workoutApiController.searchWorkouts(0, 20, "createdAt,desc", null, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        verify(workoutService).searchWorkouts(searchTerm);
+        assertEquals(1, response.getBody().getItems().size());
+        verify(workoutService).searchWorkouts(0, 20, "createdAt,desc", null, null, null);
     }
 
     @Test

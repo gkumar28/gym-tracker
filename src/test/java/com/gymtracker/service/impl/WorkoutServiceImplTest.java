@@ -4,6 +4,7 @@ import com.gymtracker.entity.Template;
 import com.gymtracker.entity.Workout;
 import com.gymtracker.repository.TemplateRepository;
 import com.gymtracker.repository.WorkoutRepository;
+import com.gymtracker.schemaobject.PaginatedResponse;
 import com.gymtracker.schemaobject.WorkoutSO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,28 +48,18 @@ class WorkoutServiceImplTest {
     }
 
     @Test
-    void testGetAllWorkouts() {
-        List<Workout> workouts = Arrays.asList(workout);
-        when(workoutRepository.findAll()).thenReturn(workouts);
-
-        List<WorkoutSO> result = workoutService.getAllWorkouts();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(workoutRepository).findAll();
-    }
-
-    @Test
     void testSearchWorkouts() {
-        String searchTerm = "chest";
         List<Workout> workouts = Arrays.asList(workout);
-        when(workoutRepository.searchByName(searchTerm)).thenReturn(workouts);
+        when(workoutRepository.searchWorkouts(null, null, null, 20, 0)).thenReturn(workouts);
+        when(workoutRepository.countWorkouts(null, null, null)).thenReturn(1L);
 
-        List<WorkoutSO> result = workoutService.searchWorkouts(searchTerm);
+        PaginatedResponse<WorkoutSO> result = workoutService.searchWorkouts(0, 20, "createdAt,desc", null, null, null);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(workoutRepository).searchByName(searchTerm);
+        assertEquals(1, result.getItems().size());
+        assertEquals(1L, result.getTotal());
+        verify(workoutRepository).searchWorkouts(null, null, null, 20, 0);
+        verify(workoutRepository).countWorkouts(null, null, null);
     }
 
     @Test
