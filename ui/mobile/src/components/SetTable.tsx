@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { DataTable, TextInput, Button, Text } from 'react-native-paper';
+import { useTheme } from '../hooks/useTheme';
 
 export type SetRow = {
   id?: string;
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export default function SetTable({ rows, onChange }: Props) {
+  const theme = useTheme();
+  
   const addSet = () => {
     onChange([...rows, { name: `Set ${rows.length + 1}`, reps: 8, weight: 20, restSec: 0, isRest: false }]);
   };
@@ -55,11 +58,11 @@ export default function SetTable({ rows, onChange }: Props) {
     <ScrollView>
       <DataTable>
         <DataTable.Header>
-          <DataTable.Title>Set</DataTable.Title>
-          <DataTable.Title numeric>Reps</DataTable.Title>
-          <DataTable.Title numeric>Weight</DataTable.Title>
-          <DataTable.Title numeric>Rest(s)</DataTable.Title>
-          <DataTable.Title>Actions</DataTable.Title>
+          <DataTable.Title textStyle={{ color: theme.text }}>Set</DataTable.Title>
+          <DataTable.Title numeric textStyle={{ color: theme.text }}>Reps</DataTable.Title>
+          <DataTable.Title numeric textStyle={{ color: theme.text }}>Weight</DataTable.Title>
+          <DataTable.Title numeric textStyle={{ color: theme.text }}>Rest(s)</DataTable.Title>
+          <DataTable.Title textStyle={{ color: theme.text }}>Actions</DataTable.Title>
         </DataTable.Header>
 
         {rows.map((r, idx) => (

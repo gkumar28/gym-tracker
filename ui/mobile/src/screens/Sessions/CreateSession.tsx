@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import SetTable, { SetRow } from '../../components/SetTable';
-import { exerciseApi } from '../../services/api';
+import { baseApi } from '../../services/api';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -44,8 +44,8 @@ export default function CreateSession() {
 
     setIsSaving(true);
     const result = await execute(async () => {
-      await exerciseApi.post('/api/session', payload);
-      Alert.alert('Saved', 'Session created');
+      await baseApi.post('/session', payload);
+      Alert.alert('Saved', 'Session created successfully');
       return true;
     });
     setIsSaving(false);

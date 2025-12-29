@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { View, FlatList, RefreshControl, ScrollView } from 'react-native';
 import { 
   Searchbar, 
@@ -12,107 +12,56 @@ import {
   Modal,
   FAB
 } from 'react-native-paper';
-import { exerciseService, Exercise, ExerciseSearchParams } from '../../services/exerciseService';
+import { useExercises, Exercise, ExerciseSearchParams } from '../../hooks/useExercises';
 import { useTheme } from '../../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApiCall } from '../../hooks/useApiCall';
 
 export default function ExerciseSearch() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(0);
-  
+
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { execute, error, reset } = useApiCall({
     showNetworkErrorScreen: true,
   });
-  
+
   const categories = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'Sports'];
   const muscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Glutes'];
   const difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
-  
-  const loadExercises = useCallback(async (reset: boolean = false) => {
-    if (loading) return;
-    
-    setLoading(true);
-    const result = await execute(async () => {
-      const params: ExerciseSearchParams = {
-        search: searchQuery || undefined,
-        category: selectedCategory || undefined,
-        muscle: selectedMuscle || undefined,
-        difficulty: selectedDifficulty || undefined,
-        limit: 10,
-        offset: reset ? 0 : offset,
-      };
-      
-      const response = await exerciseService.searchExercises(params);
-      
-      if (reset) {
-        setExercises(response.items);
-        setOffset(response.items.length);
-      } else {
-        setExercises(prev => [...prev, ...response.items]);
-        setOffset(prev => prev + response.items.length);
-      }
-      
-      setHasMore(response.hasMore);
-      return response;
-    });
-    
-    if (!result) {
-      // Error was handled by useApiCall hook
-      if (reset) {
-        setExercises([]);
-        setOffset(0);
-      }
-    }
-    
-    setLoading(false);
-    setRefreshing(false);
-  }, [loading, searchQuery, selectedCategory, selectedMuscle, selectedDifficulty, offset, execute]);
-  
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setOffset(0);
-    loadExercises(true);
-  }, [loadExercises]);
-  
-  const loadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      loadExercises(false);
-    }
-  }, [hasMore, loading, loadExercises]);
-  
+
+  // Build search params
+  const searchParams: ExerciseSearchParams = {
+    search: searchQuery || undefined,
+    category: selectedCategory || undefined,
+    muscle: selectedMuscle || undefined,
+    difficulty: selectedDifficulty || undefined,
+    limit: 50,
+    offset: 0,
+  };
+
+  const { data: exercisesData, isLoading, error: exercisesError, refetch } = useExercises(searchParams);
+
+  const exercises = exercisesData?.items || [];
+  const hasMore = exercisesData?.hasMore || false;
+
+  const hasActiveFilters = selectedCategory || selectedMuscle || selectedDifficulty;
+
+  const onRefresh = () => {
+    refetch();
+  };
+
   const clearFilters = () => {
     setSelectedCategory(null);
     setSelectedMuscle(null);
     setSelectedDifficulty(null);
-    setOffset(0);
+    setSearchQuery('');
   };
-  
-  const hasActiveFilters = selectedCategory || selectedMuscle || selectedDifficulty;
-  
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setOffset(0);
-      loadExercises(true);
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory, selectedMuscle, selectedDifficulty]);
-  
-  useEffect(() => {
-    loadExercises(true);
-  }, []);
 
   const renderExerciseItem = ({ item }: { item: Exercise }) => (
     <Card 
@@ -521,19 +470,19 @@ export default function ExerciseSearch() {
         renderItem={renderExerciseItem}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
         }
-        onEndReached={loadMore}
+        onEndReached={hasMore ? () => {} : undefined}
         onEndReachedThreshold={0.1}
         ListFooterComponent={
-          loading ? (
+          isLoading ? (
             <View style={{ padding: 16 }}>
               <ActivityIndicator />
             </View>
           ) : null
         }
         ListEmptyComponent={
-          !loading ? (
+          !isLoading ? (
             <View style={{ padding: 16, alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: '600', color: theme.textSecondary }}>No exercises found</Text>
               {hasActiveFilters && (

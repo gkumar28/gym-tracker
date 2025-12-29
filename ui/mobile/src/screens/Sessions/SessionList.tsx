@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, FlatList } from 'react-native';
 import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
-import { exerciseApi } from '../../services/api';
+import { baseApi } from '../../services/api';
 import { useQuery } from '@tanstack/react-query';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
@@ -15,7 +15,7 @@ export default function SessionList() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sessions'],
     queryFn: async () => {
-      const res = await exerciseApi.get('/api/session/workout/1');
+      const res = await baseApi.get('/session/workout/1');
       return res.data;
     },
   });

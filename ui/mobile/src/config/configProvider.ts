@@ -33,7 +33,6 @@ export class ConfigProvider {
         defaultTtl: 5 * 60 * 1000, // Could be added to env if needed
       },
       features: {
-        enableMockData: EnvLoader.getEnvVarAsBoolean('ENABLE_MOCK_DATA', false),
         enableLogging: EnvLoader.getEnvVarAsBoolean('ENABLE_LOGGING', false),
         enableAnalytics: EnvLoader.getEnvVarAsBoolean('ENABLE_ANALYTICS', false),
       },

@@ -3,16 +3,17 @@ import Constants from 'expo-constants';
 
 // Declare process for Metro bundler environment variables
 declare const process: {
-  env: {
-    API_URL?: string;
-    API_TIMEOUT?: string;
-    API_RETRY_ATTEMPTS?: string;
-    ENABLE_MOCK_DATA?: string;
-    ENABLE_LOGGING?: string;
-    ENABLE_ANALYTICS?: string;
-    NODE_ENV?: string;
-  };
+  env: EnvVars;
 } | undefined;
+
+export interface EnvVars {
+  API_URL?: string;
+  API_TIMEOUT?: string;
+  API_RETRY_ATTEMPTS?: string;
+  ENABLE_LOGGING?: string;
+  ENABLE_ANALYTICS?: string;
+  NODE_ENV?: string;
+}
 
 export class EnvLoader {
   static loadEnvVars(): Record<string, string | undefined> {
@@ -21,7 +22,6 @@ export class EnvLoader {
       API_URL: process.env.API_URL,
       API_TIMEOUT: process.env.API_TIMEOUT,
       API_RETRY_ATTEMPTS: process.env.API_RETRY_ATTEMPTS,
-      ENABLE_MOCK_DATA: process.env.ENABLE_MOCK_DATA,
       ENABLE_LOGGING: process.env.ENABLE_LOGGING,
       ENABLE_ANALYTICS: process.env.ENABLE_ANALYTICS,
       NODE_ENV: process.env.NODE_ENV,
@@ -35,7 +35,6 @@ export class EnvLoader {
         API_URL: expoConstants.apiUrl,
         API_TIMEOUT: expoConstants.apiTimeout,
         API_RETRY_ATTEMPTS: expoConstants.apiRetryAttempts,
-        ENABLE_MOCK_DATA: expoConstants.enableMockData,
         ENABLE_LOGGING: expoConstants.enableLogging,
         ENABLE_ANALYTICS: expoConstants.enableAnalytics,
         NODE_ENV: expoConstants.environment || 'development',

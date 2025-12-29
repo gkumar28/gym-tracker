@@ -10,7 +10,6 @@ export interface AppConfig {
     defaultTtl: number;
   };
   features: {
-    enableMockData: boolean;
     enableLogging: boolean;
     enableAnalytics: boolean;
   };
