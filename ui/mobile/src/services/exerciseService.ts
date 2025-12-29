@@ -1,189 +1,243 @@
-import { Exercise, ExerciseSearchParams, ExerciseResponse } from '../types/exercise';
+// src/services/exerciseService.ts
+import { exerciseApi } from './api';
+import { API_CONSTANTS, ERROR_MESSAGES } from '../constants/constants';
+import { ConfigProvider } from '../config/configProvider';
 
-// TODO: Replace with your actual API endpoint
-const API_BASE_URL = 'https://api.example.com'; // Replace with your API
+export interface ExerciseSearchParams {
+  search?: string;
+  category?: string;
+  muscle?: string;
+  equipment?: string;
+  difficulty?: string;
+  limit?: number;
+  offset?: number;
+}
 
-class ExerciseService {
-  async searchExercises(params: ExerciseSearchParams = {}): Promise<ExerciseResponse> {
+export interface PaginatedExerciseResponse {
+  items: Exercise[];
+  total: number;
+  hasMore: boolean;
+  offset: number;
+  limit: number;
+}
+
+export interface Exercise {
+  id: number;
+  name: string;
+  logo?: string;
+  description?: string;
+  category: string;
+  muscleGroups: string[];
+  equipment: string[];
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  instructions?: string[];
+  tips?: string[];
+  imageUrl?: string;
+  videoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export class ExerciseService {
+  private config = ConfigProvider.getInstance();
+  
+  // Search exercises with filters
+  async searchExercises(params: ExerciseSearchParams = {}): Promise<PaginatedExerciseResponse> {
+    if (this.config.getFeatureFlags().enableMockData) {
+      return this.getMockExercises(params);
+    }
+    
     try {
-      const queryParams = new URLSearchParams();
+      const response = await exerciseApi.get<PaginatedExerciseResponse>('/search', {
+        params: {
+          search: params.search,
+          category: params.category,
+          muscle: params.muscle,
+          equipment: params.equipment,
+          difficulty: params.difficulty,
+          limit: params.limit || API_CONSTANTS.DEFAULT_LIMIT,
+          offset: params.offset || API_CONSTANTS.DEFAULT_OFFSET,
+        },
+      });
       
-      if (params.searchTerm) queryParams.append('search', params.searchTerm);
-      if (params.category) queryParams.append('category', params.category);
-      if (params.muscleGroup) queryParams.append('muscle', params.muscleGroup);
-      if (params.equipment) queryParams.append('equipment', params.equipment);
-      if (params.difficulty) queryParams.append('difficulty', params.difficulty);
-      if (params.limit) queryParams.append('limit', params.limit.toString());
-      if (params.offset) queryParams.append('offset', params.offset.toString());
-
-      const response = await fetch(`${API_BASE_URL}/exercises?${queryParams}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return {
-        exercises: data.exercises || [],
-        total: data.total || 0,
-        hasMore: data.hasMore || false,
-      };
+      return response.data;
     } catch (error) {
-      console.error('Error searching exercises:', error);
-      // Return mock data for development
+      console.error(ERROR_MESSAGES.NETWORK, error);
+      // Fallback to mock data for development
       return this.getMockExercises(params);
     }
   }
 
+  // Get exercise by ID
   async getExerciseById(id: string): Promise<Exercise | null> {
+    if (this.config.getFeatureFlags().enableMockData) {
+      const mockExercises = this.getMockExercises().items;
+      return mockExercises.find(ex => ex.id === parseInt(id)) || null;
+    }
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/exercises/${id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
+      const response = await exerciseApi.get<Exercise>(`/${id}`);
+      return response.data;
     } catch (error) {
-      console.error('Error fetching exercise:', error);
-      // Return mock exercise for development
-      const mockExercises = this.getMockExercises().exercises;
-      return mockExercises.find(ex => ex.id === id) || null;
+      console.error(ERROR_MESSAGES.NETWORK, error);
+      // Fallback to mock exercise for development
+      const mockExercises = this.getMockExercises().items;
+      return mockExercises.find(ex => ex.id === parseInt(id)) || null;
     }
   }
 
+  // Get all categories
   async getCategories(): Promise<string[]> {
+    if (this.config.getFeatureFlags().enableMockData) {
+      return [...API_CONSTANTS.DEFAULT_CATEGORIES];
+    }
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/categories`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
+      const response = await exerciseApi.get<string[]>('/categories');
+      return response.data;
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      // Return mock categories for development
-      return ['Cardio', 'Strength', 'Flexibility', 'Balance', 'Sports'];
+      console.error(ERROR_MESSAGES.NETWORK, error);
+      // Fallback to mock categories
+      return [...API_CONSTANTS.DEFAULT_CATEGORIES];
     }
   }
 
-  private getMockExercises(params: ExerciseSearchParams = {}): ExerciseResponse {
+  // Create new exercise
+  async createExercise(exercise: Omit<Exercise, 'id' | 'createdAt' | 'updatedAt'>): Promise<Exercise> {
+    try {
+      const response = await exerciseApi.post<Exercise>('', exercise);
+      return response.data;
+    } catch (error) {
+      console.error(ERROR_MESSAGES.NETWORK, error);
+      throw error;
+    }
+  }
+
+  // Mock data fallback
+  private getMockExercises(params: ExerciseSearchParams = {}): PaginatedExerciseResponse {
     const mockExercises: Exercise[] = [
       {
-        id: '1',
-        name: 'Push-up',
-        description: 'Classic upper body exercise targeting chest, shoulders, and triceps',
+        id: 1,
+        name: 'Bench Press',
+        description: 'Compound chest exercise targeting chest, shoulders, and triceps',
         category: 'Strength',
         muscleGroups: ['Chest', 'Shoulders', 'Triceps'],
-        equipment: ['Bodyweight'],
-        difficulty: 'beginner',
+        equipment: ['Barbell', 'Bench'],
+        difficulty: 'INTERMEDIATE',
         instructions: [
-          'Start in plank position with hands shoulder-width apart',
-          'Lower your body until chest nearly touches the floor',
-          'Push back up to starting position',
-          'Keep your body straight throughout the movement'
+          'Lie on bench with feet flat on floor',
+          'Grip bar slightly wider than shoulder width',
+          'Lower bar to chest slowly',
+          'Press bar up until arms are fully extended'
         ],
-        tips: ['Keep core engaged', 'Breathe out when pushing up'],
+        tips: [
+          'Keep back flat against bench',
+          'Control the movement',
+          'Don\'t bounce the bar off your chest'
+        ],
+        imageUrl: 'https://example.com/bench-press.jpg',
+        videoUrl: 'https://example.com/bench-press.mp4',
+        createdAt: '2025-12-29T10:00:00Z',
+        updatedAt: '2025-12-29T10:00:00Z'
       },
       {
-        id: '2',
+        id: 2,
         name: 'Squat',
-        description: 'Fundamental lower body exercise for legs and glutes',
+        description: 'Compound leg exercise targeting quadriceps, glutes, and hamstrings',
         category: 'Strength',
         muscleGroups: ['Quadriceps', 'Glutes', 'Hamstrings'],
-        equipment: ['Bodyweight'],
-        difficulty: 'beginner',
+        equipment: ['Barbell', 'Squat Rack'],
+        difficulty: 'BEGINNER',
         instructions: [
-          'Stand with feet shoulder-width apart',
-          'Lower your body as if sitting in a chair',
-          'Keep your back straight and chest up',
-          'Return to starting position'
+          'Stand with bar across upper back',
+          'Feet shoulder-width apart',
+          'Lower body until thighs are parallel to floor',
+          'Drive through heels to return to standing'
         ],
-        tips: ['Keep knees behind toes', 'Go as low as comfortable'],
+        tips: [
+          'Keep chest up and back straight',
+          'Knees should track over toes',
+          'Go as low as comfortable'
+        ],
+        imageUrl: 'https://example.com/squat.jpg',
+        videoUrl: 'https://example.com/squat.mp4',
+        createdAt: '2025-12-29T10:00:00Z',
+        updatedAt: '2025-12-29T10:00:00Z'
       },
       {
-        id: '3',
-        name: 'Running',
-        description: 'Cardiovascular exercise that improves endurance',
-        category: 'Cardio',
-        muscleGroups: ['Legs', 'Core', 'Cardio'],
-        equipment: ['None'],
-        difficulty: 'beginner',
-        instructions: [
-          'Start with a warm-up walk',
-          'Gradually increase pace to a jog',
-          'Maintain steady breathing',
-          'Cool down with walking'
-        ],
-        tips: ['Wear proper shoes', 'Stay hydrated'],
-      },
-      {
-        id: '4',
-        name: 'Plank',
-        description: 'Core strengthening exercise',
+        id: 3,
+        name: 'Deadlift',
+        description: 'Full body exercise focusing on posterior chain',
         category: 'Strength',
-        muscleGroups: ['Core', 'Shoulders'],
-        equipment: ['Bodyweight'],
-        difficulty: 'beginner',
+        muscleGroups: ['Back', 'Glutes', 'Hamstrings'],
+        equipment: ['Barbell'],
+        difficulty: 'ADVANCED',
         instructions: [
-          'Start in push-up position',
-          'Hold body straight like a plank',
-          'Engage core muscles',
-          'Hold for desired time'
+          'Stand with bar over mid-foot',
+          'Bend at hips and knees to grip bar',
+          'Lift bar by extending hips and knees',
+          'Lower bar with controlled movement'
         ],
-        tips: ['Keep hips level', "Don't let back sag"],
-      },
-      {
-        id: '5',
-        name: 'Lunge',
-        description: 'Single-leg exercise for lower body strength',
-        category: 'Strength',
-        muscleGroups: ['Quadriceps', 'Glutes', 'Hamstrings'],
-        equipment: ['Bodyweight'],
-        difficulty: 'intermediate',
-        instructions: [
-          'Step forward with one leg',
-          'Lower hips until both knees are bent at 90 degrees',
-          'Push back to starting position',
-          'Alternate legs'
+        tips: [
+          'Keep back straight throughout',
+          'Drive through heels',
+          'Don\'t round your lower back'
         ],
-        tips: ['Keep front knee behind toes', 'Keep torso upright'],
-      },
+        imageUrl: 'https://example.com/deadlift.jpg',
+        videoUrl: 'https://example.com/deadlift.mp4',
+        createdAt: '2025-12-29T10:00:00Z',
+        updatedAt: '2025-12-29T10:00:00Z'
+      }
     ];
 
-    // Filter based on search params
+    // Apply filters
     let filteredExercises = mockExercises;
-    
-    if (params.searchTerm) {
-      filteredExercises = filteredExercises.filter(ex =>
-        ex.name.toLowerCase().includes(params.searchTerm!.toLowerCase()) ||
-        ex.description?.toLowerCase().includes(params.searchTerm!.toLowerCase())
-      );
-    }
-    
-    if (params.category) {
-      filteredExercises = filteredExercises.filter(ex =>
-        ex.category.toLowerCase() === params.category!.toLowerCase()
-      );
-    }
-    
-    if (params.muscleGroup) {
-      filteredExercises = filteredExercises.filter(ex =>
-        ex.muscleGroups.some(mg => 
-          mg.toLowerCase().includes(params.muscleGroup!.toLowerCase())
-        )
+
+    if (params.search) {
+      const searchLower = params.search.toLowerCase();
+      filteredExercises = filteredExercises.filter(ex => 
+        ex.name.toLowerCase().includes(searchLower) ||
+        ex.description?.toLowerCase().includes(searchLower)
       );
     }
 
-    const limit = params.limit || 10;
-    const offset = params.offset || 0;
-    const paginatedExercises = filteredExercises.slice(offset, offset + limit);
+    if (params.category) {
+      filteredExercises = filteredExercises.filter(ex => 
+        ex.category.toLowerCase() === params.category.toLowerCase()
+      );
+    }
+
+    if (params.muscle) {
+      filteredExercises = filteredExercises.filter(ex => 
+        ex.muscleGroups.some(mg => mg.toLowerCase() === params.muscle.toLowerCase())
+      );
+    }
+
+    if (params.equipment) {
+      filteredExercises = filteredExercises.filter(ex => 
+        ex.equipment.some(eq => eq.toLowerCase() === params.equipment.toLowerCase())
+      );
+    }
+
+    if (params.difficulty) {
+      filteredExercises = filteredExercises.filter(ex => 
+        ex.difficulty.toLowerCase() === params.difficulty.toLowerCase()
+      );
+    }
+
+    // Apply pagination
+    const limit = params.limit || API_CONSTANTS.DEFAULT_LIMIT;
+    const offset = params.offset || API_CONSTANTS.DEFAULT_OFFSET;
+    const startIndex = offset;
+    const endIndex = startIndex + limit;
+    const paginatedExercises = filteredExercises.slice(startIndex, endIndex);
 
     return {
-      exercises: paginatedExercises,
+      items: paginatedExercises,
       total: filteredExercises.length,
-      hasMore: offset + limit < filteredExercises.length,
+      hasMore: endIndex < filteredExercises.length,
+      offset: offset,
+      limit: limit,
     };
   }
 }

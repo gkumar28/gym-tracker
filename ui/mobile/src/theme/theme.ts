@@ -47,9 +47,9 @@ export const lightTheme: ThemeConfig = {
   text: '#1e293b',
   textSecondary: '#64748b',
   border: '#e2e8f0',
-  success: '#059669',
-  warning: '#d97706',
-  error: '#dc2626',
+  success: '#10b981',
+  warning: '#f59e0b',
+  error: '#ef4444',
 };
 
 export const darkTheme: ThemeConfig = {
