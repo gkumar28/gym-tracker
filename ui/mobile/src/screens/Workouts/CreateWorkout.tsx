@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, Switch } from 'react-native-paper';
-import SetTable, { SetRow } from '../../components/SetTable';
+import { TextInput, Button, Text, IconButton, Card } from 'react-native-paper';
 import { workoutService } from '../../services/workoutService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useNavigation } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
+import ExerciseCard from '../../components/ExerciseCard';
+import { WorkoutExercise, WorkoutSet } from '../../types/workout';
 
 export default function CreateWorkout() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'CreateWorkout'>>();
@@ -15,34 +16,61 @@ export default function CreateWorkout() {
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
   });
-  const [name, setName] = useState<string>('');
-  const [rows, setRows] = useState<SetRow[]>([{ name: 'Set 1', reps: 8, weight: 50, restSec: 0, isRest: false }]);
-  const [showRestRows, setShowRestRows] = useState(true);
+  
+  const [workoutName, setWorkoutName] = useState<string>('');
+  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
+  const addExercise = () => {
+    const newExercise: WorkoutExercise = {
+      id: Date.now().toString(),
+      name: '',
+      sets: [{ id: Date.now().toString(), reps: 8, weight: 50, restSeconds: 60 }],
+      restAfterExercise: 0  // Backend field, not shown in UI
+    };
+    setExercises([...exercises, newExercise]);
+  };
+
+  const updateExercise = (exerciseId: string, updates: Partial<WorkoutExercise>) => {
+    setExercises(exercises.map(exercise => 
+      exercise.id === exerciseId ? { ...exercise, ...updates } : exercise
+    ));
+  };
+
+  const removeExercise = (exerciseId: string) => {
+    setExercises(exercises.filter(exercise => exercise.id !== exerciseId));
+  };
+
   const handleSave = async () => {
-    // Convert rows into sets and merge rest rows into previous actual set
-    const rowsCopy = [...rows];
-    const sets: any[] = [];
-    for (let i = 0; i < rowsCopy.length; i++) {
-      const row = rowsCopy[i];
-      if (row.isRest) {
-        // find previous actual set and add restSec to it
-        for (let j = i - 1; j >= 0; j--) {
-          if (!rowsCopy[j].isRest) {
-            rowsCopy[j].restSec = (rowsCopy[j].restSec ?? 0) + (row.restSec ?? 0);
-            break;
-          }
-        }
-      } else {
-        const setObj: any = { name: row.name, reps: row.reps, weight: row.weight };
-        if ((row.restSec ?? 0) > 0) setObj.restSec = row.restSec;
-        sets.push(setObj);
-      }
+    if (!workoutName.trim()) {
+      Alert.alert('Error', 'Please enter a workout name');
+      return;
     }
 
-    const payload = { name, sets };
-    console.log('Saving payload', payload);
+    if (exercises.length === 0) {
+      Alert.alert('Error', 'Please add at least one exercise');
+      return;
+    }
+
+    // Convert to backend format
+    const workoutExercises = exercises.map(exercise => ({
+      exerciseName: exercise.name,
+      sets: exercise.sets.map(set => ({
+        reps: set.reps,
+        weight: set.weight,
+        restSeconds: set.restSeconds
+      })),
+      exerciseOrder: 0, // Will be set by index
+      restAfterExerciseSeconds: exercise.restAfterExercise || 0
+    }));
+
+    // Set exercise order based on array index
+    workoutExercises.forEach((exercise, index) => {
+      exercise.exerciseOrder = index;
+    });
+
+    const payload = { name: workoutName, workoutExercises };
+    
     setIsSaving(true);
     
     const result = await execute(async () => {
@@ -58,44 +86,92 @@ export default function CreateWorkout() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={{ padding: 16 }}>
-        <TextInput 
-          label="Workout Name" 
-          value={name} 
-          onChangeText={setName} 
-          style={{ marginBottom: 12, backgroundColor: theme.surface }}
-          textColor={theme.text}
-          cursorColor={theme.primary}
-          selectionColor={theme.primary}
-          activeOutlineColor={theme.primary}
-          outlineColor={theme.border}
-          mode="outlined"
-          theme={{
-            colors: {
-              text: theme.text,
-              placeholder: theme.textSecondary,
-              primary: theme.primary,
-              background: theme.surface,
-              surface: theme.surface,
-              onSurface: theme.text,
-              outline: theme.border,
-            }
-          }}
-        />
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-          <Text style={{ marginRight: 8, color: theme.text, fontSize: 16 }}>Show inserted Rest rows</Text>
-          <Switch 
-            value={showRestRows} 
-            onValueChange={setShowRestRows}
-            color={theme.primary}
-          />
+        {/* Workout Name Section */}
+        <Card style={{ marginBottom: 16, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
+          <Card.Content>
+            <TextInput 
+              label="Workout Name" 
+              value={workoutName}
+              onChangeText={setWorkoutName}
+              style={{ backgroundColor: theme.surface }}
+              textColor={theme.text}
+              cursorColor={theme.primary}
+              selectionColor={theme.primary}
+              activeOutlineColor={theme.primary}
+              outlineColor={theme.border}
+              mode="outlined"
+              theme={{
+                colors: {
+                  text: theme.text,
+                  placeholder: theme.textSecondary,
+                  primary: theme.primary,
+                  background: theme.surface,
+                  surface: theme.surface,
+                  onSurface: theme.text,
+                  outline: theme.border,
+                }
+              }}
+            />
+          </Card.Content>
+        </Card>
+
+        {/* Exercises Section */}
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ 
+            fontSize: 18, 
+            fontWeight: '600', 
+            color: theme.text, 
+            marginBottom: 12,
+            letterSpacing: 1
+          }}>
+            EXERCISES
+          </Text>
+          
+          {exercises.map((exercise, index) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              index={index}
+              onUpdate={updateExercise}
+              onRemove={removeExercise}
+            />
+          ))}
+          
+          {exercises.length === 0 && (
+            <View style={{ 
+              alignItems: 'center', 
+              padding: 32, 
+              backgroundColor: theme.surface,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: theme.border,
+              borderStyle: 'dashed'
+            }}>
+              <Text style={{ color: theme.textSecondary, marginBottom: 8 }}>
+                No exercises yet
+              </Text>
+              <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
+                Add your first exercise to get started
+              </Text>
+            </View>
+          )}
+          
+          <Button 
+            mode="outlined" 
+            onPress={addExercise}
+            style={{ marginTop: 12 }}
+            textColor={theme.primary}
+          >
+            + Add Exercise
+          </Button>
         </View>
 
-        <SetTable rows={rows} onChange={setRows} />
-
+        {/* Save Button */}
         <Button 
           mode="contained" 
           onPress={handleSave} 
-          loading={isSaving} 
+          loading={isSaving}
+          disabled={!workoutName.trim() || exercises.length === 0}
           style={{ marginTop: 16 }}
           buttonColor={theme.primary}
           textColor={theme.background}

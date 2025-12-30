@@ -5,7 +5,22 @@ export interface Workout {
   id: string;
   name?: string;
   createdAt?: string;
-  sets?: any[];
+  workoutExercises?: WorkoutExercise[];
+}
+
+export interface WorkoutExercise {
+  id?: string;
+  exerciseName?: string;
+  sets?: WorkoutSet[];
+  exerciseOrder?: number;
+  restAfterExerciseSeconds?: number;
+}
+
+export interface WorkoutSet {
+  reps?: number;
+  weight?: number;
+  restSeconds?: number;
+  notes?: string;
 }
 
 export interface Session {
