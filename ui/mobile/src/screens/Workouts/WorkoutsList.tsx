@@ -48,18 +48,22 @@ export default function WorkoutsList() {
 
   if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
   if (isError) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background }}>
       <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load workouts.</Text>
-      <Button mode="contained" onPress={handleRefresh}>
+      <Button mode="contained" onPress={handleRefresh} buttonColor={theme.primary} textColor={theme.background}>
         Retry
       </Button>
     </View>
   );
 
-  if (!workouts || workouts.length === 0) return <Text style={{ fontSize: 18, fontWeight: '600', padding: 16 }}>Workout not found</Text>;
+  if (!workouts || workouts.length === 0) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, backgroundColor: theme.background }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.text }}>Workout not found</Text>
+    </View>
+  );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <FlatList
         data={workouts}
         keyExtractor={(item) => item.id}
@@ -68,7 +72,13 @@ export default function WorkoutsList() {
           <WorkoutCard item={item} onPress={() => navigation.navigate('WorkoutDetail', { id: item.id })} />
         )}
         ListHeaderComponent={() => (
-          <Button mode="contained" onPress={() => navigation.navigate('CreateWorkout')} style={{ marginBottom: 12 }}>
+          <Button 
+            mode="contained" 
+            onPress={() => navigation.navigate('CreateWorkout')} 
+            style={{ marginBottom: 12 }}
+            buttonColor={theme.primary}
+            textColor={theme.background}
+          >
             Create Workout
           </Button>
         )}

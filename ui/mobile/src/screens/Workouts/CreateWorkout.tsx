@@ -56,18 +56,53 @@ export default function CreateWorkout() {
   };
 
   return (
-    <ScrollView style={{ padding: 16 }}>
-      <TextInput label="Workout Name" value={name} onChangeText={setName} style={{ marginBottom: 12 }} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-        <Text style={{ marginRight: 8 }}>Show inserted Rest rows</Text>
-        <Switch value={showRestRows} onValueChange={setShowRestRows} />
+    <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+      <View style={{ padding: 16 }}>
+        <TextInput 
+          label="Workout Name" 
+          value={name} 
+          onChangeText={setName} 
+          style={{ marginBottom: 12, backgroundColor: theme.surface }}
+          textColor={theme.text}
+          cursorColor={theme.primary}
+          selectionColor={theme.primary}
+          activeOutlineColor={theme.primary}
+          outlineColor={theme.border}
+          mode="outlined"
+          theme={{
+            colors: {
+              text: theme.text,
+              placeholder: theme.textSecondary,
+              primary: theme.primary,
+              background: theme.surface,
+              surface: theme.surface,
+              onSurface: theme.text,
+              outline: theme.border,
+            }
+          }}
+        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <Text style={{ marginRight: 8, color: theme.text, fontSize: 16 }}>Show inserted Rest rows</Text>
+          <Switch 
+            value={showRestRows} 
+            onValueChange={setShowRestRows}
+            color={theme.primary}
+          />
+        </View>
+
+        <SetTable rows={rows} onChange={setRows} />
+
+        <Button 
+          mode="contained" 
+          onPress={handleSave} 
+          loading={isSaving} 
+          style={{ marginTop: 16 }}
+          buttonColor={theme.primary}
+          textColor={theme.background}
+        >
+          Save Workout
+        </Button>
       </View>
-
-      <SetTable rows={rows} onChange={setRows} />
-
-      <Button mode="contained" onPress={handleSave} loading={isSaving} style={{ marginTop: 16 }}>
-        Save Workout
-      </Button>
     </ScrollView>
   );
 }

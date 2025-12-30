@@ -10,6 +10,7 @@ import SessionList from '../screens/Sessions/SessionList';
 import CreateSession from '../screens/Sessions/CreateSession';
 import ExerciseSearch from '../screens/Exercises/ExerciseSearch';
 import { ErrorScreen } from '../screens/ErrorScreen';
+import { useTheme } from '../hooks/useTheme';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -31,8 +32,21 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function WorkoutsStack() {
+  const theme = useTheme();
+  
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.surface,
+        },
+        headerTintColor: theme.text,
+        headerTitleStyle: {
+          color: theme.text,
+        },
+        headerShadowVisible: false,
+      }}
+    >
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts' }} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout' }} />
       <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout' }} />

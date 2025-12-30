@@ -55,7 +55,7 @@ export default function SetTable({ rows, onChange }: Props) {
   const actualSetCount = rows.filter(r => !r.isRest).length;
 
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: theme.background }}>
       <DataTable>
         <DataTable.Header>
           <DataTable.Title textStyle={{ color: theme.text }}>Set</DataTable.Title>
@@ -73,8 +73,24 @@ export default function SetTable({ rows, onChange }: Props) {
                 value={r.name ?? ''}
                 onChangeText={(txt) => updateRowField(idx, 'name', txt)}
                 disabled={!!r.isRest}
-                style={{ height: 40 }}
+                style={{ height: 40, backgroundColor: theme.surface }}
                 dense
+                textColor={theme.text}
+                cursorColor={theme.primary}
+                selectionColor={theme.primary}
+                activeOutlineColor={theme.primary}
+                outlineColor={theme.border}
+                theme={{
+                  colors: {
+                    text: theme.text,
+                    placeholder: theme.textSecondary,
+                    primary: theme.primary,
+                    background: theme.surface,
+                    surface: theme.surface,
+                    onSurface: theme.text,
+                    outline: theme.border,
+                  }
+                }}
               />
             </DataTable.Cell>
 
@@ -84,8 +100,24 @@ export default function SetTable({ rows, onChange }: Props) {
                 value={r.reps?.toString() ?? ''}
                 onChangeText={(txt) => updateRowField(idx, 'reps', txt ? Number(txt) : undefined)}
                 disabled={!!r.isRest}
-                style={{ height: 40, width: 80 }}
+                style={{ height: 40, width: 80, backgroundColor: theme.surface }}
                 dense
+                textColor={theme.text}
+                cursorColor={theme.primary}
+                selectionColor={theme.primary}
+                activeOutlineColor={theme.primary}
+                outlineColor={theme.border}
+                theme={{
+                  colors: {
+                    text: theme.text,
+                    placeholder: theme.textSecondary,
+                    primary: theme.primary,
+                    background: theme.surface,
+                    surface: theme.surface,
+                    onSurface: theme.text,
+                    outline: theme.border,
+                  }
+                }}
               />
             </DataTable.Cell>
 
@@ -95,8 +127,24 @@ export default function SetTable({ rows, onChange }: Props) {
                 value={r.weight?.toString() ?? ''}
                 onChangeText={(txt) => updateRowField(idx, 'weight', txt ? Number(txt) : undefined)}
                 disabled={!!r.isRest}
-                style={{ height: 40, width: 80 }}
+                style={{ height: 40, width: 80, backgroundColor: theme.surface }}
                 dense
+                textColor={theme.text}
+                cursorColor={theme.primary}
+                selectionColor={theme.primary}
+                activeOutlineColor={theme.primary}
+                outlineColor={theme.border}
+                theme={{
+                  colors: {
+                    text: theme.text,
+                    placeholder: theme.textSecondary,
+                    primary: theme.primary,
+                    background: theme.surface,
+                    surface: theme.surface,
+                    onSurface: theme.text,
+                    outline: theme.border,
+                  }
+                }}
               />
             </DataTable.Cell>
 
@@ -105,15 +153,44 @@ export default function SetTable({ rows, onChange }: Props) {
                 keyboardType="numeric"
                 value={(r.restSec ?? 0).toString()}
                 onChangeText={(txt) => updateRowField(idx, 'restSec', txt ? Number(txt) : 0)}
-                style={{ height: 40, width: 80 }}
+                style={{ height: 40, width: 80, backgroundColor: theme.surface }}
                 dense
+                textColor={theme.text}
+                cursorColor={theme.primary}
+                selectionColor={theme.primary}
+                activeOutlineColor={theme.primary}
+                outlineColor={theme.border}
+                theme={{
+                  colors: {
+                    text: theme.text,
+                    placeholder: theme.textSecondary,
+                    primary: theme.primary,
+                    background: theme.surface,
+                    surface: theme.surface,
+                    onSurface: theme.text,
+                    outline: theme.border,
+                  }
+                }}
               />
             </DataTable.Cell>
 
             <DataTable.Cell>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button compact mode="contained-tonal" onPress={() => addRest(idx)} disabled={r.isRest}>Add Rest Below</Button>
-                <Button compact onPress={() => removeRow(idx)}>
+                <Button 
+                  compact 
+                  mode="contained-tonal" 
+                  onPress={() => addRest(idx)} 
+                  disabled={r.isRest}
+                  buttonColor={theme.surface}
+                  textColor={theme.text}
+                >
+                  Add Rest Below
+                </Button>
+                <Button 
+                  compact 
+                  onPress={() => removeRow(idx)}
+                  textColor={theme.primary}
+                >
                   Remove
                 </Button>
               </View>
@@ -124,8 +201,24 @@ export default function SetTable({ rows, onChange }: Props) {
       </DataTable>
 
       <View style={{ marginVertical: 12 }}>
-        <Button mode="contained" onPress={addSet} style={{ marginBottom: 8 }}>Add Set</Button>
-        <Button mode="contained" onPress={() => addRest()} disabled={actualSetCount === 0}>Add Rest</Button>
+        <Button 
+          mode="contained" 
+          onPress={addSet} 
+          style={{ marginBottom: 8 }}
+          buttonColor={theme.primary}
+          textColor={theme.background}
+        >
+          Add Set
+        </Button>
+        <Button 
+          mode="contained" 
+          onPress={() => addRest()} 
+          disabled={actualSetCount === 0}
+          buttonColor={theme.secondary}
+          textColor={theme.background}
+        >
+          Add Rest
+        </Button>
       </View>
     </ScrollView>
   );
