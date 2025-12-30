@@ -17,6 +17,7 @@ public class SessionExerciseMapper {
         so.setExerciseName(sessionExercise.getExerciseName());
         so.setSets(SetMapper.toSOList(sessionExercise.getSets()));
         so.setExerciseOrder(sessionExercise.getExerciseOrder());
+        so.setRestAfterExerciseSeconds(sessionExercise.getRestAfterExerciseSeconds());
         return so;
     }
 
@@ -29,6 +30,7 @@ public class SessionExerciseMapper {
         sessionExercise.setExerciseName(so.getExerciseName());
         sessionExercise.setSets(SetMapper.toEntityList(so.getSets()));
         sessionExercise.setExerciseOrder(so.getExerciseOrder());
+        sessionExercise.setRestAfterExerciseSeconds(so.getRestAfterExerciseSeconds());
         return sessionExercise;
     }
 

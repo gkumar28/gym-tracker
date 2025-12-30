@@ -29,5 +29,8 @@ public class SessionExercise {
 
     @Column(name = "exercise_order")
     private Integer exerciseOrder;
+
+    @Column(name = "rest_after_exercise_seconds")
+    private Integer restAfterExerciseSeconds = 0;
 }
 

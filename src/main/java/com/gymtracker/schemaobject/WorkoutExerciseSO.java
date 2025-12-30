@@ -29,5 +29,8 @@ public class WorkoutExerciseSO {
 
     @Min(value = 0, message = "Exercise order cannot be negative")
     private Integer exerciseOrder;
+
+    @Min(value = 0, message = "Rest after exercise cannot be negative")
+    private Integer restAfterExerciseSeconds = 0;
 }
 

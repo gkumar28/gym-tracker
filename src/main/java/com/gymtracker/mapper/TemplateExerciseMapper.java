@@ -17,6 +17,7 @@ public class TemplateExerciseMapper {
         so.setExerciseName(templateExercise.getExerciseName());
         so.setSets(SetMapper.toSOList(templateExercise.getSets()));
         so.setExerciseOrder(templateExercise.getExerciseOrder());
+        so.setRestAfterExerciseSeconds(templateExercise.getRestAfterExerciseSeconds());
         return so;
     }
 
@@ -29,6 +30,7 @@ public class TemplateExerciseMapper {
         templateExercise.setExerciseName(so.getExerciseName());
         templateExercise.setSets(SetMapper.toEntityList(so.getSets()));
         templateExercise.setExerciseOrder(so.getExerciseOrder());
+        templateExercise.setRestAfterExerciseSeconds(so.getRestAfterExerciseSeconds());
         return templateExercise;
     }
 
