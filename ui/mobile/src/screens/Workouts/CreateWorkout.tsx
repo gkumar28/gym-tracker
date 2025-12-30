@@ -4,10 +4,11 @@ import { TextInput, Button, Text, IconButton, Card } from 'react-native-paper';
 import { workoutService } from '../../services/workoutService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import ExerciseCard from '../../components/ExerciseCard';
+import SuccessBanner from '../../components/SuccessBanner';
 import { WorkoutExercise, WorkoutSet } from '../../types/workout';
 
 export default function CreateWorkout() {
@@ -20,6 +21,7 @@ export default function CreateWorkout() {
   const [workoutName, setWorkoutName] = useState<string>('');
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const addExercise = () => {
     const newExercise: WorkoutExercise = {
@@ -74,9 +76,19 @@ export default function CreateWorkout() {
     setIsSaving(true);
     
     const result = await execute(async () => {
-      await workoutService.createWorkout(payload);
-      Alert.alert('Saved', 'Workout created successfully');
-      navigation.navigate('WorkoutsList');
+      const createdWorkout = await workoutService.createWorkout(payload);
+      
+      // Show success banner briefly
+      setShowSuccess(true);
+      
+      // Hide banner and navigate after short delay
+      setTimeout(() => {
+        setShowSuccess(false);
+        setTimeout(() => {
+          navigation.navigate('WorkoutDetail', { id: createdWorkout.id });
+        }, 100);
+      }, 800);
+      
       return true;
     });
     
@@ -84,8 +96,15 @@ export default function CreateWorkout() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      {/* Success Banner */}
+      <SuccessBanner 
+        message="Workout created successfully!" 
+        visible={showSuccess} 
+      />
+      
+      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={{ padding: 16 }}>
         {/* Workout Name Section */}
         <Card style={{ marginBottom: 16, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
           <Card.Content>
@@ -179,6 +198,7 @@ export default function CreateWorkout() {
           Save Workout
         </Button>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

@@ -23,7 +23,7 @@ export default function WorkoutDetail() {
   });
   
   const [workout, setWorkout] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start with false, show loading only during fetch
   const [isError, setIsError] = useState(false);
 
   const loadWorkout = async () => {
@@ -50,7 +50,12 @@ export default function WorkoutDetail() {
     });
   };
 
-  if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
+  if (isLoading || !workout) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background }}>
+      <ActivityIndicator animating={true} style={{ margin: 20 }} />
+      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.text, marginBottom: 16 }}>Loading workout details...</Text>
+    </View>
+  );
   if (isError) return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background }}>
       <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load workout details.</Text>

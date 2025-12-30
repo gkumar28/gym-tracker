@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, FlatList } from 'react-native';
 import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
 import WorkoutCard from '../../components/WorkoutCard';
@@ -6,13 +6,14 @@ import { workoutService, Workout, PaginatedWorkoutResponse } from '../../service
 import { useApiCall } from '../../hooks/useApiCall';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../../hooks/useTheme';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
 export default function WorkoutsList() {
   const navigation = useNavigation<NavProp>();
+  const route = useRoute();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
@@ -21,6 +22,8 @@ export default function WorkoutsList() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const hasHandledRefresh = useRef(false);
+  const needsRefresh = useRef(false);
 
   const loadWorkouts = async () => {
     try {
@@ -28,6 +31,7 @@ export default function WorkoutsList() {
       setIsError(false);
       const response: PaginatedWorkoutResponse = await workoutService.searchWorkouts();
       setWorkouts(response.items);
+      needsRefresh.current = false; // Reset refresh flag after successful load
     } catch (err) {
       setIsError(true);
     } finally {
@@ -35,9 +39,25 @@ export default function WorkoutsList() {
     }
   };
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     loadWorkouts();
   }, []);
+
+  useEffect(() => {
+    const params = route.params as { refresh?: boolean };
+    if (params && params.refresh) {
+      hasHandledRefresh.current = true;
+      loadWorkouts();
+    }
+  }, [route.params]);
+
+  useEffect(() => {
+    if (isFocused && needsRefresh.current) {
+      loadWorkouts(); // Only refresh if needed and screen is focused
+    }
+  }, [route.params, isFocused, needsRefresh.current]);
 
   const handleRefresh = async () => {
     await execute(async () => {

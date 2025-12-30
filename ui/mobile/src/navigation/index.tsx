@@ -14,7 +14,7 @@ import { useTheme } from '../hooks/useTheme';
 
 export type RootStackParamList = {
   Home: undefined;
-  WorkoutsList: undefined;
+  WorkoutsList: { refresh?: boolean };
   WorkoutDetail: { id: string };
   CreateWorkout: undefined;
   SessionList: { workoutId?: string };
