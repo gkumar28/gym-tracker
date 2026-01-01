@@ -40,7 +40,7 @@ export default function RootNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Workouts" component={WorkoutsStack} options={{ headerShown: false }} />
-      <Tab.Screen name="CreateSession" component={CreateSession} options={{ headerShown: false }} />
+      <Tab.Screen name="Sessions" component={SessionList} options={{ headerShown: false }} />
       <Tab.Screen name="Exercises" component={ExerciseSearch} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
@@ -58,7 +58,7 @@ export type RootStackParamList = {
 export type RootTabParamList = {
   Home: undefined;
   Workouts: undefined;
-  CreateSession: undefined;
+  Sessions: undefined;
   Exercises: undefined;
 };
 
