@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, ScrollView } from 'react-native';
-import { Card, Text, Button, ActivityIndicator, IconButton, Searchbar, Chip, Portal, Modal } from 'react-native-paper';
+import { Card, Text, Button, ActivityIndicator, IconButton, Searchbar, Chip, Portal, Modal, FAB } from 'react-native-paper';
 import { sessionService, Session, SessionSearchParams, PaginatedSessionResponse } from '../../services/sessionService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
@@ -37,6 +37,7 @@ export default function SessionList() {
   // Build search params
   const searchParams: SessionSearchParams = {
     search: searchQuery || undefined,
+    workoutName: searchQuery || undefined,
     workoutId: selectedWorkoutId || route.params?.workoutId || undefined,
     dateFrom: selectedDateFrom || undefined,
     dateTo: selectedDateTo || undefined,
@@ -100,6 +101,22 @@ export default function SessionList() {
     if (workoutId) {
       navigation.navigate('WorkoutDetail', { id: workoutId });
     }
+  };
+
+  const getWorkoutDisplayName = (session: any) => {
+    // Use workoutName if available, fallback to nested workout object
+    if (session.workoutName) {
+      return session.workoutName;
+    }
+    if (session.workout?.name) {
+      return session.workout.name;
+    }
+    // Otherwise, show a generic message with workoutId
+    return session.workoutId ? `Workout ID: ${session.workoutId}` : 'Unknown Workout';
+  };
+
+  const navigateToCreateSession = () => {
+    navigation.navigate('CreateSession');
   };
 
   if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
@@ -208,7 +225,7 @@ export default function SessionList() {
             <Card style={{ marginBottom: 8, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
               <Card.Title 
                 title={`Session ${item.id}`}
-                subtitle={item.workout?.name || 'Unknown Workout'}
+                subtitle={getWorkoutDisplayName(item)}
                 right={(props) => (
                   <IconButton
                     {...props}
@@ -314,6 +331,18 @@ export default function SessionList() {
           </View>
         </Modal>
       </Portal>
+      
+      <FAB
+        icon="plus"
+        style={{
+          position: 'absolute',
+          margin: 16,
+          right: 0,
+          bottom: 0,
+          backgroundColor: theme.primary,
+        }}
+        onPress={navigateToCreateSession}
+      />
     </View>
   );
 }

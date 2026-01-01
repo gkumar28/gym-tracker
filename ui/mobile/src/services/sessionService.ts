@@ -4,6 +4,7 @@ import { baseApi } from './api';
 export interface Session {
   id: string;
   workoutId?: string;
+  workoutName?: string;
   workout?: {
     id: string;
     name: string;
@@ -32,6 +33,7 @@ export interface SessionSearchParams {
   minDuration?: number;
   maxDuration?: number;
   search?: string; // Search by workout name or notes
+  workoutName?: string; // Filter by workout name
 }
 
 export class SessionService {
@@ -49,6 +51,7 @@ export class SessionService {
       if (params?.minDuration !== undefined) queryParams.append('minDuration', params.minDuration.toString());
       if (params?.maxDuration !== undefined) queryParams.append('maxDuration', params.maxDuration.toString());
       if (params?.search) queryParams.append('search', params.search);
+      if (params?.workoutName) queryParams.append('workoutName', params.workoutName);
       
       const url = queryParams.toString() ? `/session/search?${queryParams.toString()}` : '/session/search';
       const response = await baseApi.get(url);

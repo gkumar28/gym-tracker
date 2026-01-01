@@ -111,6 +111,16 @@ export default function WorkoutDetail() {
         </Button>
 
         <Button 
+          mode="contained" 
+          onPress={() => nav.navigate('CreateSession', { workoutId: route.params.id })} 
+          style={{ marginTop: 8, marginBottom: 8 }}
+          buttonColor={theme.success}
+          textColor={theme.background}
+        >
+          Create Session
+        </Button>
+
+        <Button 
           mode="outlined" 
           onPress={() => nav.navigate('SessionList', { workoutId: route.params.id })} 
           style={{ marginTop: 8 }}

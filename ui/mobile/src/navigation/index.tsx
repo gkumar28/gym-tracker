@@ -52,6 +52,7 @@ export type RootStackParamList = {
   WorkoutDetail: { id: string };
   CreateWorkout: undefined;
   SessionList: { workoutId?: string };
+  CreateSession: { workoutId?: string };
   Error: { error?: string };
 };
 
@@ -75,18 +76,14 @@ function WorkoutsStack() {
           backgroundColor: theme.surface,
         },
         headerTintColor: theme.text,
-        headerTitleStyle: {
-          color: theme.text,
-        },
-        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts' }} />
-      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout' }} />
+      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout Details' }} />
       <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout' }} />
       <Stack.Screen name="SessionList" component={SessionList} options={{ title: 'Sessions' }} />
+      <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session' }} />
       <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />
     </Stack.Navigator>
   );
 }
-
