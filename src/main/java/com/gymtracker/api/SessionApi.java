@@ -139,7 +139,7 @@ public interface SessionApi {
         description = "Retrieves all sessions with pagination support and optional filters. Results are ordered by session date (most recent first).",
         operationId = "getAllSessions"
     )
-    @GetMapping
+    @GetMapping("/search")
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
