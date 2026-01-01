@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useNavigation, useRoute, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../../hooks/useTheme';
+import { debounce } from 'lodash';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
@@ -24,6 +25,10 @@ export default function WorkoutsList() {
   const [isError, setIsError] = useState(false);
   const hasHandledRefresh = useRef(false);
   const needsRefresh = useRef(false);
+
+  const debouncedLoadWorkouts = debounce(() => {
+    loadWorkouts();
+  }, 300);
 
   const loadWorkouts = async () => {
     try {
@@ -42,26 +47,26 @@ export default function WorkoutsList() {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    loadWorkouts();
+    debouncedLoadWorkouts();
   }, []);
 
   useEffect(() => {
     const params = route.params as { refresh?: boolean };
     if (params && params.refresh) {
       hasHandledRefresh.current = true;
-      loadWorkouts();
+      debouncedLoadWorkouts();
     }
   }, [route.params]);
 
   useEffect(() => {
     if (isFocused && needsRefresh.current) {
-      loadWorkouts(); // Only refresh if needed and screen is focused
+      debouncedLoadWorkouts(); // Only refresh if needed and screen is focused
     }
   }, [route.params, isFocused, needsRefresh.current]);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      await loadWorkouts();
+      debouncedLoadWorkouts();
       return Promise.resolve();
     });
   };

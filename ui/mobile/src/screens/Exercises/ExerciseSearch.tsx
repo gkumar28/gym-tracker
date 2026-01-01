@@ -16,6 +16,7 @@ import { exerciseService, Exercise, ExerciseSearchParams, PaginatedExerciseRespo
 import { useTheme } from '../../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApiCall } from '../../hooks/useApiCall';
+import { debounce } from 'lodash';
 
 export default function ExerciseSearch() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +50,10 @@ export default function ExerciseSearch() {
     offset: 0,
   };
 
+  const debouncedLoadExercises = debounce(() => {
+    loadExercises();
+  }, 300);
+
   const loadExercises = async () => {
     try {
       setIsLoading(true);
@@ -63,7 +68,7 @@ export default function ExerciseSearch() {
   };
 
   useEffect(() => {
-    loadExercises();
+    debouncedLoadExercises();
   }, [searchQuery, selectedCategory, selectedMuscle, selectedDifficulty]);
 
   const exercises = exercisesData?.items || [];
@@ -72,7 +77,7 @@ export default function ExerciseSearch() {
   const hasActiveFilters = selectedCategory || selectedMuscle || selectedDifficulty;
 
   const onRefresh = () => {
-    loadExercises();
+    debouncedLoadExercises();
   };
 
   const clearFilters = () => {

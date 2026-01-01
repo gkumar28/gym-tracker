@@ -85,7 +85,14 @@ export default function CreateWorkout() {
       setTimeout(() => {
         setShowSuccess(false);
         setTimeout(() => {
-          navigation.navigate('WorkoutDetail', { id: createdWorkout.id });
+          // Reset navigation stack to WorkoutsList, then navigate to WorkoutDetail
+          navigation.reset({
+            index: 1,
+            routes: [
+              { name: 'WorkoutsList' },
+              { name: 'WorkoutDetail', params: { id: createdWorkout.id } }
+            ]
+          });
         }, 100);
       }, 800);
       

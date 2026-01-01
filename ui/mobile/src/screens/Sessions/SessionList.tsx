@@ -7,6 +7,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
+import { debounce } from 'lodash';
 
 type SessionListRouteProp = {
   params?: {
@@ -27,6 +28,10 @@ export default function SessionList() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  const debouncedLoadSessions = debounce(() => {
+    loadSessions();
+  }, 300);
 
   const loadSessions = async () => {
     try {
@@ -50,12 +55,12 @@ export default function SessionList() {
   };
 
   useEffect(() => {
-    loadSessions();
+    debouncedLoadSessions();
   }, [route.params?.workoutId]);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      await loadSessions();
+      debouncedLoadSessions();
       return Promise.resolve();
     });
   };
