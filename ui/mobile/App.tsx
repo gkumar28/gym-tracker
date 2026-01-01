@@ -4,7 +4,8 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { RootNavigator } from './src/navigation';
+import { navigationRef } from './src/navigation';
+import RootNavigator from './src/navigation';
 import { useTheme } from './src/hooks/useTheme';
 import { createPaperTheme } from './src/theme/theme';
 import { ThemeProvider } from './src/contexts/ThemeContext';
@@ -24,7 +25,7 @@ function AppContent() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <View style={styles.container}>
           <AppHeader />
           <RootNavigator />
