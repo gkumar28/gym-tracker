@@ -9,6 +9,7 @@ public interface SessionRepositoryCustom {
         Long workoutId,
         String sessionDateFrom,
         String sessionDateTo,
+        String workoutName,
         Integer limit,
         Integer offset
     );
@@ -16,6 +17,7 @@ public interface SessionRepositoryCustom {
     Long countSessions(
         Long workoutId,
         String sessionDateFrom,
-        String sessionDateTo
+        String sessionDateTo,
+        String workoutName
     );
 }

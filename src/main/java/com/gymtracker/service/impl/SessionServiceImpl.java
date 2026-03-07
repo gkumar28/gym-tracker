@@ -58,7 +58,7 @@ public class SessionServiceImpl implements SessionService {
     
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponse<SessionSO> getAllSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo) {
+    public PaginatedResponse<SessionSO> searchSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo, String workoutName) {
         // Validate and apply defaults
         int validatedPage = (page != null && page >= 0) ? page : AppConstants.DEFAULT_PAGE_NUMBER;
         int validatedSize = (size != null && size > 0 && size <= AppConstants.MAX_PAGE_SIZE) 
@@ -69,12 +69,12 @@ public class SessionServiceImpl implements SessionService {
         
         // Fetch filtered data
         List<Session> sessions = sessionRepository.searchSessions(
-            workoutId, sessionDateFrom, sessionDateTo, validatedSize, offset
+            workoutId, sessionDateFrom, sessionDateTo, workoutName, validatedSize, offset
         );
         
         // Count total results
         Long total = sessionRepository.countSessions(
-            workoutId, sessionDateFrom, sessionDateTo
+            workoutId, sessionDateFrom, sessionDateTo, workoutName
         );
         
         // OPTIMIZED: Use mapper method that skips nested data to avoid N+1 queries

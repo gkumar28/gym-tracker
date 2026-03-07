@@ -135,9 +135,9 @@ public interface SessionApi {
     );
     
     @Operation(
-        summary = "Get all sessions with pagination and filters",
-        description = "Retrieves all sessions with pagination support and optional filters. Results are ordered by session date (most recent first).",
-        operationId = "getAllSessions"
+        summary = "Search sessions with pagination and filters",
+        description = "Retrieves sessions with pagination support and optional filters. Results are ordered by session date (most recent first).",
+        operationId = "searchSessions"
     )
     @GetMapping("/search")
     @ApiResponses(value = {
@@ -160,7 +160,7 @@ public interface SessionApi {
             content = @Content
         )
     })
-    ResponseEntity<PaginatedResponse<SessionSO>> getAllSessions(
+    ResponseEntity<PaginatedResponse<SessionSO>> searchSessions(
         @Parameter(
             description = "Page number (0-based)",
             example = "0",
@@ -201,7 +201,14 @@ public interface SessionApi {
             example = "2024-12-31 23:59:59",
             required = false
         )
-        @RequestParam(required = false) String sessionDateTo
+        @RequestParam(required = false) String sessionDateTo,
+        
+        @Parameter(
+            description = "Filter by workout name",
+            example = "Chest Day",
+            required = false
+        )
+        @RequestParam(required = false) String workoutName
     );
     
     @Operation(

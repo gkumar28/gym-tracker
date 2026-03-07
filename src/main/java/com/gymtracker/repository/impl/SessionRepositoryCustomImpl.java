@@ -26,6 +26,7 @@ public class SessionRepositoryCustomImpl implements SessionRepositoryCustom {
             Long workoutId,
             String sessionDateFrom,
             String sessionDateTo,
+            String workoutName,
             Integer limit,
             Integer offset) {
         
@@ -33,7 +34,10 @@ public class SessionRepositoryCustomImpl implements SessionRepositoryCustom {
         CriteriaQuery<Session> query = cb.createQuery(Session.class);
         Root<Session> root = query.from(Session.class);
         
-        List<Predicate> predicates = buildPredicates(cb, root, workoutId, sessionDateFrom, sessionDateTo);
+        // Fetch join to load workout data
+        root.fetch("workout", JoinType.LEFT);
+        
+        List<Predicate> predicates = buildPredicates(cb, root, workoutId, sessionDateFrom, sessionDateTo, workoutName);
         
         if (!predicates.isEmpty()) {
             query.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -59,13 +63,14 @@ public class SessionRepositoryCustomImpl implements SessionRepositoryCustom {
     public Long countSessions(
             Long workoutId,
             String sessionDateFrom,
-            String sessionDateTo) {
+            String sessionDateTo,
+            String workoutName) {
         
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<Session> root = query.from(Session.class);
         
-        List<Predicate> predicates = buildPredicates(cb, root, workoutId, sessionDateFrom, sessionDateTo);
+        List<Predicate> predicates = buildPredicates(cb, root, workoutId, sessionDateFrom, sessionDateTo, workoutName);
         
         if (!predicates.isEmpty()) {
             query.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -77,13 +82,21 @@ public class SessionRepositoryCustomImpl implements SessionRepositoryCustom {
     
     private List<Predicate> buildPredicates(
             CriteriaBuilder cb, Root<Session> root, 
-            Long workoutId, String sessionDateFrom, String sessionDateTo) {
+            Long workoutId, String sessionDateFrom, String sessionDateTo, String workoutName) {
         
         List<Predicate> predicates = new ArrayList<>();
         
         // Workout filter
         if (workoutId != null) {
             predicates.add(cb.equal(root.get("workout").get("id"), workoutId));
+        }
+        
+        // Workout name filter
+        if (workoutName != null && !workoutName.trim().isEmpty()) {
+            predicates.add(cb.like(
+                cb.lower(root.get("workout").get("name")), 
+                "%" + workoutName.toLowerCase().trim() + "%"
+            ));
         }
         
         // Session date from filter

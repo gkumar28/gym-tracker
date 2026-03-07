@@ -15,5 +15,5 @@ public interface SessionService {
     
     List<SessionSO> getAllSessionsByWorkoutId(Long workoutId);
     
-    PaginatedResponse<SessionSO> getAllSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo);
+    PaginatedResponse<SessionSO> searchSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo, String workoutName);
 }

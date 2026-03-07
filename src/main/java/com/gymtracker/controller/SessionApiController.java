@@ -41,8 +41,8 @@ public class SessionApiController implements SessionApi {
     }
     
     @Override
-    public ResponseEntity<PaginatedResponse<SessionSO>> getAllSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo) {
-        PaginatedResponse<SessionSO> sessions = sessionService.getAllSessions(page, size, sort, workoutId, sessionDateFrom, sessionDateTo);
+    public ResponseEntity<PaginatedResponse<SessionSO>> searchSessions(Integer page, Integer size, String sort, Long workoutId, String sessionDateFrom, String sessionDateTo, String workoutName) {
+        PaginatedResponse<SessionSO> sessions = sessionService.searchSessions(page, size, sort, workoutId, sessionDateFrom, sessionDateTo, workoutName);
         return ResponseEntity.ok(sessions);
     }
 }

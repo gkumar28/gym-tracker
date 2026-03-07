@@ -19,6 +19,8 @@ public class SessionSO {
     private Long id;
 
     private Long workoutId;
+    
+    private String workoutName;
 
     @Valid
     @NotNull(message = "Session exercises cannot be null")

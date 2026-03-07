@@ -18,6 +18,7 @@ public class SessionMapper {
         so.setId(session.getId());
         if (session.getWorkout() != null) {
             so.setWorkoutId(session.getWorkout().getId());
+            so.setWorkoutName(session.getWorkout().getName());
         }
         so.setSessionExercises(SessionExerciseMapper.toSOList(session.getSessionExercises()));
         so.setSessionDate(session.getSessionDate());
@@ -44,6 +45,7 @@ public class SessionMapper {
         // Set workout reference without loading full workout
         if (session.getWorkout() != null) {
             so.setWorkoutId(session.getWorkout().getId());
+            so.setWorkoutName(session.getWorkout().getName());
         }
         // Skip sessionExercises to avoid N+1 queries
         so.setSessionExercises(null);

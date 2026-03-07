@@ -116,7 +116,12 @@ export default function SessionList() {
   };
 
   const navigateToCreateSession = () => {
-    navigation.navigate('CreateSession');
+    // If we're viewing sessions for a specific workout, pass that workoutId to CreateSession
+    if (route.params?.workoutId) {
+      navigation.navigate('CreateSession', { workoutId: route.params.workoutId });
+    } else {
+      navigation.navigate('CreateSession');
+    }
   };
 
   if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
