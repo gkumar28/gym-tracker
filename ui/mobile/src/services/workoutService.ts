@@ -5,6 +5,7 @@ export interface Workout {
   id: string;
   name?: string;
   createdAt?: string;
+  exerciseCount?: number,
   workoutExercises?: WorkoutExercise[];
 }
 

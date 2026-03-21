@@ -244,7 +244,7 @@ export default function SessionList() {
                 )}
                 {item.workout && (
                   <Text style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>
-                    {item.sessionExercises?.length || 0} exercises
+                    {item.exerciseCount || 0} exercises
                   </Text>
                 )}
                 {item.notes && (

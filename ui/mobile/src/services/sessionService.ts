@@ -13,6 +13,7 @@ export interface Session {
   sessionDate?: string;
   durationMinutes?: number;
   notes?: string;
+  exerciseCount?: number;
 }
 
 export interface PaginatedSessionResponse {

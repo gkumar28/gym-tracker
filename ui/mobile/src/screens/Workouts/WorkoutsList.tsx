@@ -39,9 +39,10 @@ export default function WorkoutsList() {
   const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null);
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 
-  const debouncedLoadWorkouts = debounce((searchQuery: string) => {
-    loadWorkouts(searchQuery);
-  }, 300);
+  const debouncedLoadWorkouts = React.useMemo(
+    () => debounce((query: string) => loadWorkouts(query), 250),
+    [selectedDateFrom, selectedDateTo]
+  );
 
   const loadWorkouts = async (searchQuery: string) => {
     try {
@@ -147,7 +148,7 @@ export default function WorkoutsList() {
           >
             <Card.Title
               title={item.name}
-              subtitle={`${item.workoutExercises?.length || 0} exercises`}
+              subtitle={`${item.exerciseCount || 0} exercises`}
             />
 
             <Card.Actions>
