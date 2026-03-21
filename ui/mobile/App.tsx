@@ -10,6 +10,7 @@ import { useTheme } from './src/hooks/useTheme';
 import { createPaperTheme } from './src/theme/theme';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppHeader from './src/components/AppHeader';
+import { ToastContainer } from "react-toastify";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function AppContent() {
       <NavigationContainer ref={navigationRef}>
         <View style={styles.container}>
           <AppHeader />
+          <ToastContainer position="top-center" autoClose={1000} toastStyle={{color: theme.text, backgroundColor: theme.background}}/>
           <RootNavigator />
         </View>
       </NavigationContainer>
