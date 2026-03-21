@@ -40,7 +40,6 @@ export default function RootNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Workouts" component={WorkoutsStack} options={{ headerShown: false }} />
-      <Tab.Screen name="Sessions" component={SessionList} options={{ headerShown: false }} />
       <Tab.Screen name="Exercises" component={ExerciseSearch} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
@@ -76,13 +75,14 @@ function WorkoutsStack() {
           backgroundColor: theme.surface,
         },
         headerTintColor: theme.text,
+        headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts' }} />
-      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout Details' }} />
-      <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout' }} />
-      <Stack.Screen name="SessionList" component={SessionList} options={{ title: 'Sessions' }} />
-      <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session' }} />
+      <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts', headerShown: false }} />
+      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout Details', headerShown: true }} />
+      <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout', headerShown: true }} />
+      <Stack.Screen name="SessionList" component={SessionList} options={{ title: 'Sessions', headerShown: true }} />
+      <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session', headerShown: true }} />
       <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />
     </Stack.Navigator>
   );

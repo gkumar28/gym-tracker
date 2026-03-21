@@ -201,6 +201,13 @@ export default function CreateWorkout() {
           style={{ marginTop: 16 }}
           buttonColor={theme.primary}
           textColor={theme.background}
+          theme={{
+            colors: {
+              primary: theme.primary,
+              surfaceDisabled: theme.border,
+              onSurfaceDisabled: theme.textSecondary
+            }
+          }}
         >
           Save Workout
         </Button>

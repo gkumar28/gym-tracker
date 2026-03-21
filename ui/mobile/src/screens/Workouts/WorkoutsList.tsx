@@ -1,42 +1,63 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList } from 'react-native';
-import { Card, Text, Button, ActivityIndicator } from 'react-native-paper';
-import WorkoutCard from '../../components/WorkoutCard';
+import {
+  Card,
+  Text,
+  Button,
+  ActivityIndicator,
+  IconButton,
+  Searchbar,
+  FAB
+} from 'react-native-paper';
 import { workoutService, Workout, PaginatedWorkoutResponse } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
+import { useTheme } from '../../hooks/useTheme';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { useNavigation, useRoute, useFocusEffect, useIsFocused } from '@react-navigation/native';
-import { useTheme } from '../../hooks/useTheme';
 import { debounce } from 'lodash';
+import LoadingComponent from '../../components/LoadingComponent';
+import ErrorComponent from '../../components/ErrorComponent';
+import { Color } from 'react-native/types_generated/Libraries/Animated/AnimatedExports';
 
-type NavProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
+type WorkoutListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
 export default function WorkoutsList() {
-  const navigation = useNavigation<NavProp>();
-  const route = useRoute();
+
+  const navigation = useNavigation<WorkoutListNavigationProp>();
   const theme = useTheme();
+
   const { execute } = useApiCall({
-    showNetworkErrorScreen: true,
+    showNetworkErrorScreen: true
   });
-  
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
+
+  const [workouts, setWorkouts] = useState<PaginatedWorkoutResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const hasHandledRefresh = useRef(false);
-  const needsRefresh = useRef(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null);
+  const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 
-  const debouncedLoadWorkouts = debounce(() => {
-    loadWorkouts();
+  const debouncedLoadWorkouts = debounce((searchQuery: string) => {
+    loadWorkouts(searchQuery);
   }, 300);
 
-  const loadWorkouts = async () => {
+  const loadWorkouts = async (searchQuery: string) => {
     try {
+
       setIsLoading(true);
       setIsError(false);
-      const response: PaginatedWorkoutResponse = await workoutService.searchWorkouts();
-      setWorkouts(response.items);
-      needsRefresh.current = false; // Reset refresh flag after successful load
+
+      const data = await workoutService.searchWorkouts({
+        name: searchQuery,
+        createdDateFrom: selectedDateFrom,
+        createdDateTo: selectedDateTo
+      });
+
+      setWorkouts(data);
+
     } catch (err) {
       setIsError(true);
     } finally {
@@ -44,70 +65,138 @@ export default function WorkoutsList() {
     }
   };
 
-  const isFocused = useIsFocused();
-
   useEffect(() => {
-    debouncedLoadWorkouts();
-  }, []);
-
-  useEffect(() => {
-    const params = route.params as { refresh?: boolean };
-    if (params && params.refresh) {
-      hasHandledRefresh.current = true;
-      debouncedLoadWorkouts();
-    }
-  }, [route.params]);
-
-  useEffect(() => {
-    if (isFocused && needsRefresh.current) {
-      debouncedLoadWorkouts(); // Only refresh if needed and screen is focused
-    }
-  }, [route.params, isFocused, needsRefresh.current]);
+    debouncedLoadWorkouts(searchQuery);
+  }, [searchQuery]);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      debouncedLoadWorkouts();
+      debouncedLoadWorkouts(searchQuery);
       return Promise.resolve();
     });
   };
 
-  if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
-  if (isError) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background }}>
-      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load workouts.</Text>
-      <Button mode="contained" onPress={handleRefresh} buttonColor={theme.primary} textColor={theme.background}>
-        Retry
-      </Button>
-    </View>
-  );
+  const navigateToWorkout = (id: string) => {
+    navigation.navigate('WorkoutDetail', { id });
+  };
 
-  if (!workouts || workouts.length === 0) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, backgroundColor: theme.background }}>
-      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.text }}>Workout not found</Text>
-    </View>
-  );
+  const navigateToCreateWorkout = () => {
+    navigation.navigate('CreateWorkout');
+  };
+
+  if (isLoading && !workouts) {
+    return <LoadingComponent />;
+  }
+
+  if (isError) {
+    return <ErrorComponent message='No Workouts found'/>;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <FlatList
-        data={workouts}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <WorkoutCard item={item} onPress={() => navigation.navigate('WorkoutDetail', { id: item.id })} />
-        )}
-        ListHeaderComponent={() => (
-          <Button 
-            mode="contained" 
-            onPress={() => navigation.navigate('CreateWorkout')} 
-            style={{ marginBottom: 12 }}
-            buttonColor={theme.primary}
-            textColor={theme.background}
-          >
-            Create Workout
-          </Button>
-        )}
+
+    {/* Search */}
+    <View style={{ 
+        padding: 16, 
+        paddingBottom: 8,
+        backgroundColor: theme.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.border
+      }}>
+      <Searchbar
+        placeholder="Search workouts..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        loading={isLoading}
+        style={{
+          marginBottom: 8,
+          backgroundColor: theme.background,
+          borderBottomWidth: 1,
+          borderColor: theme.border 
+        }}
+        inputStyle={{ color: theme.text }}
+        placeholderTextColor={theme.textSecondary}
+        iconColor={theme.primary}
       />
+    </View>
+
+    {/* Workout List */}
+    <View style={{ padding: 16 }}>
+
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 16,
+          color: theme.text
+        }}
+      >
+        Recent Workouts
+      </Text>
+
+      <FlatList
+        data={workouts?.items || []}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Card
+            style={{
+              marginBottom: 8,
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+              borderWidth: 1
+            }}
+          >
+            <Card.Title
+              title={item.name}
+              subtitle={`${item.workoutExercises?.length || 0} exercises`}
+            />
+
+            <Card.Actions>
+              <Button
+                mode="contained"
+                onPress={() => navigateToWorkout(item.id)}
+                buttonColor={theme.primary}
+                compact
+              >
+                View Workout
+              </Button>
+            </Card.Actions>
+          </Card>
+        )}
+        ListEmptyComponent={
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 20
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                color: theme.textSecondary
+              }}
+            >
+              No workouts found
+            </Text>
+          </View>
+        }
+      />
+    </View>
+
+    {/* Create Workout FAB */}
+    <FAB
+      icon="plus"
+      color={theme.background}
+      style={{
+        position: 'absolute',
+        margin: 16,
+        right: 0,
+        bottom: 0,
+        backgroundColor: theme.primary,
+      }}
+      onPress={navigateToCreateWorkout}
+    />
+
     </View>
   );
 }

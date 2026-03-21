@@ -8,6 +8,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { debounce } from 'lodash';
+import LoadingComponent from '../../components/LoadingComponent';
+import ErrorComponent from '../../components/ErrorComponent';
 
 type SessionListRouteProp = {
   params?: {
@@ -124,15 +126,8 @@ export default function SessionList() {
     }
   };
 
-  if (isLoading) return <ActivityIndicator animating={true} style={{ margin: 20 }} />;
-  if (isError) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 18, fontWeight: '600', color: theme.error, marginBottom: 16 }}>Failed to load sessions.</Text>
-      <Button mode="contained" onPress={handleRefresh}>
-        Retry
-      </Button>
-    </View>
-  );
+  if (isLoading) return <LoadingComponent />;
+  if (isError) return <ErrorComponent message='Failed to load Sessions' />
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -339,6 +334,7 @@ export default function SessionList() {
       
       <FAB
         icon="plus"
+        color={theme.background}
         style={{
           position: 'absolute',
           margin: 16,

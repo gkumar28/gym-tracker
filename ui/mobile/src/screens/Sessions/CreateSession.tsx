@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { 
   View, 
   ScrollView, 
@@ -77,6 +77,12 @@ export default function CreateSession() {
   useEffect(() => {
     debouncedSearchWorkouts(workoutSearchQuery);
   }, [workoutSearchQuery]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isFromWorkoutDetail && workoutDetails ? `Create Session for ${workoutDetails.name}` : 'Create Session'
+      })
+    })
 
   // Fetch workout details when coming from workout detail
   useEffect(() => {
@@ -203,12 +209,6 @@ export default function CreateSession() {
         )}
 
         <View style={{ padding: 16 }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: theme.text }}>
-            {isFromWorkoutDetail && workoutDetails 
-              ? `Create Session for ${workoutDetails.name}` 
-              : 'Create Session'
-            }
-          </Text>
 
           {/* Workout Selection - Only show if not from workout detail */}
           {!isFromWorkoutDetail && (
@@ -372,6 +372,13 @@ export default function CreateSession() {
             disabled={isSaving}
             loading={isSaving}
             style={{ marginBottom: 32 }}
+            theme={{
+              colors: {
+                primary: theme.primary,
+                surfaceDisabled: theme.border,
+                onSurfaceDisabled: theme.textSecondary
+              }
+            }}
           >
             {isSaving ? 'Creating...' : 'Create Session'}
           </Button>
