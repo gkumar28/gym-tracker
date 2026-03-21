@@ -24,6 +24,8 @@ public class SessionSO {
     
     private String workoutName;
 
+    private Integer exerciseCount;
+
     @Valid
     @NotNull(message = "Session exercises cannot be null")
     @Size(min = 1, message = "At least one exercise is required")

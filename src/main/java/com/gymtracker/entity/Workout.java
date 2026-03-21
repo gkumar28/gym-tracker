@@ -32,14 +32,16 @@ public class Workout {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+    @Column(name = "exercise_count")
+    private Integer exerciseCount;
 
+    @PrePersist
     @PreUpdate
-    protected void onUpdate() {
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
         updatedAt = LocalDateTime.now();
+        exerciseCount = this.getWorkoutExercises().size();
     }
 }

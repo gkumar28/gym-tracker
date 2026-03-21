@@ -19,6 +19,7 @@ public class WorkoutMapper {
         so.setWorkoutExercises(WorkoutExerciseMapper.toSOList(workout.getWorkoutExercises()));
         so.setCreatedAt(workout.getCreatedAt());
         so.setUpdatedAt(workout.getUpdatedAt());
+        so.setExerciseCount(workout.getExerciseCount());
         return so;
     }
 
@@ -37,6 +38,7 @@ public class WorkoutMapper {
         so.setUpdatedAt(workout.getUpdatedAt());
         // Skip workoutExercises to avoid N+1 queries
         so.setWorkoutExercises(null);
+        so.setExerciseCount(workout.getExerciseCount());
         return so;
     }
 
@@ -54,6 +56,7 @@ public class WorkoutMapper {
         }
         workout.setCreatedAt(so.getCreatedAt());
         workout.setUpdatedAt(so.getUpdatedAt());
+        workout.setExerciseCount(so.getExerciseCount());
         return workout;
     }
 

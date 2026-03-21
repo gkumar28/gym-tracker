@@ -25,6 +25,7 @@ public class SessionMapper {
         so.setNotes(session.getNotes());
         so.setDurationMinutes(session.getDurationMinutes());
         so.setCreatedAt(session.getCreatedAt());
+        so.setExerciseCount(session.getExerciseCount());
         return so;
     }
 
@@ -49,6 +50,7 @@ public class SessionMapper {
         }
         // Skip sessionExercises to avoid N+1 queries
         so.setSessionExercises(null);
+        so.setExerciseCount(session.getExerciseCount());
         return so;
     }
 
@@ -63,6 +65,7 @@ public class SessionMapper {
         session.setNotes(so.getNotes());
         session.setDurationMinutes(so.getDurationMinutes());
         session.setCreatedAt(so.getCreatedAt());
+        session.setExerciseCount(so.getExerciseCount());
         
         List<SessionExercise> sessionExercises = SessionExerciseMapper.toEntityList(so.getSessionExercises());
         if (sessionExercises != null) {

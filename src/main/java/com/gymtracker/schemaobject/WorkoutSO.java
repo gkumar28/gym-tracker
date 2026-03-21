@@ -34,5 +34,7 @@ public class WorkoutSO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    private Integer exerciseCount;
 }
 

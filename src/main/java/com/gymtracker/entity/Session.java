@@ -39,11 +39,18 @@ public class Session {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
+    @Column(name = "exercise_count")
+    private Integer exerciseCount;
+
     @PrePersist
+    @PreUpdate
     protected void onCreate() {
         if (sessionDate == null) {
             sessionDate = LocalDateTime.now();
         }
-        createdAt = LocalDateTime.now();
+        if (createdAt == null) { 
+            createdAt = LocalDateTime.now();
+        }
+        exerciseCount = this.getSessionExercises().size();
     }
 }
