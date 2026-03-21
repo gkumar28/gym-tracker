@@ -64,3 +64,5 @@ export const ERROR_MESSAGES = {
 export type DifficultyLevel = typeof API_CONSTANTS.DIFFICULTY_LEVELS[number];
 export type ExerciseCategory = typeof API_CONSTANTS.DEFAULT_CATEGORIES[number];
 export type ScreenName = typeof UI_CONSTANTS.SCREEN_NAMES[keyof typeof UI_CONSTANTS.SCREEN_NAMES];
+
+export type SnackBarType = 'error' | 'warning' | 'success' | 'info';

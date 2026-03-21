@@ -8,8 +8,9 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import ExerciseCard from '../../components/ExerciseCard';
-import SuccessBanner from '../../components/SuccessBanner';
-import { WorkoutExercise, WorkoutSet } from '../../types/workout';
+import { WorkouteRestAfterExercise, WorkoutExercise, WorkoutItem, WorkoutSet } from '../../types/workout';
+import RestCard from '../../components/RestCard';
+import { toast } from 'react-toastify';
 
 export default function CreateWorkout() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'CreateWorkout'>>();
@@ -19,28 +20,48 @@ export default function CreateWorkout() {
   });
   
   const [workoutName, setWorkoutName] = useState<string>('');
-  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const [items, setItems] = useState<WorkoutItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const addExercise = () => {
     const newExercise: WorkoutExercise = {
-      id: Date.now().toString(),
-      name: '',
-      sets: [{ id: Date.now().toString(), reps: 8, weight: 50, restSeconds: 60 }],
-      restAfterExercise: 0  // Backend field, not shown in UI
+      exerciseName: '',
+      sets: [{ reps: 8, weight: 50, restSeconds: 60 }],
     };
-    setExercises([...exercises, newExercise]);
+
+    const rest: WorkouteRestAfterExercise = {
+      restAfterExercise: 60
+    }
+
+    if (items.length == 0) {
+      setItems([{ type: 'EXERCISE', data: newExercise }]);
+    }
+    else {
+      setItems([...items, 
+        { type: "REST", data: rest}, 
+        { type: "EXERCISE", data: newExercise}]);
+    }
   };
 
-  const updateExercise = (exerciseId: string, updates: Partial<WorkoutExercise>) => {
-    setExercises(exercises.map(exercise => 
-      exercise.id === exerciseId ? { ...exercise, ...updates } : exercise
+  const updateExercise = (index: number, updates: Partial<WorkoutExercise>) => {
+    setItems(items.map((item, id) => 
+      id == index && item.type == "EXERCISE" ? { type: item.type, data: { ...item.data, ...updates }} : item
     ));
   };
 
-  const removeExercise = (exerciseId: string) => {
-    setExercises(exercises.filter(exercise => exercise.id !== exerciseId));
+  const removeExercise = (index: number) => {
+
+    setItems(items => {
+      return items.filter((_, id) => {
+        if (index === items.length - 1) {
+          // Last item → remove index and previous
+          return id !== index && id !== index - 1;
+        } else {
+          // Normal case → remove index and next
+          return id !== index && id !== index + 1;
+        }
+      });
+    });
   };
 
   const handleSave = async () => {
@@ -49,22 +70,34 @@ export default function CreateWorkout() {
       return;
     }
 
-    if (exercises.length === 0) {
+    if (items.length === 0) {
       Alert.alert('Error', 'Please add at least one exercise');
       return;
     }
 
     // Convert to backend format
-    const workoutExercises = exercises.map(exercise => ({
-      exerciseName: exercise.name,
-      sets: exercise.sets.map(set => ({
-        reps: set.reps,
-        weight: set.weight,
-        restSeconds: set.restSeconds
-      })),
-      exerciseOrder: 0, // Will be set by index
-      restAfterExerciseSeconds: exercise.restAfterExercise || 0
-    }));
+    const workoutExercises = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+    
+      if (item.type === 'EXERCISE') {
+        let restAfter = 0;
+        const nextItem = items[i + 1];
+        if (nextItem && nextItem.type === "REST") {
+          restAfter = nextItem.data.restAfterExercise;
+        }
+    
+        workoutExercises.push({
+          exerciseName: item.data.exerciseName,
+          sets: item.data.sets.map(set => ({
+            reps: set.reps,
+            weight: set.weight,
+            restSeconds: set.restSeconds,
+          })),
+          restAfterExerciseSeconds: restAfter,
+        });
+      }
+    }
 
     // Set exercise order based on array index
     workoutExercises.forEach((exercise, index) => {
@@ -76,39 +109,44 @@ export default function CreateWorkout() {
     setIsSaving(true);
     
     const result = await execute(async () => {
-      const createdWorkout = await workoutService.createWorkout(payload);
-      
-      // Show success banner briefly
-      setShowSuccess(true);
-      
-      // Hide banner and navigate after short delay
+      let workout;
+    
+      try {
+        workout = await workoutService.createWorkout(payload);
+        toast.success("Workout Created Successfully!");
+      } catch (error) {
+        const message = error?.message || "Some error has occurred. Please try again later";
+        toast.error(message);
+        workout = undefined;
+      }
+    
       setTimeout(() => {
-        setShowSuccess(false);
-        setTimeout(() => {
-          // Reset navigation stack to WorkoutsList, then navigate to WorkoutDetail
+        if (workout) {
+          // Navigate to WorkoutDetail (stack index 1)
           navigation.reset({
             index: 1,
             routes: [
-              { name: 'WorkoutsList' },
-              { name: 'WorkoutDetail', params: { id: createdWorkout.id } }
+              { name: "WorkoutsList" },
+              { name: "WorkoutDetail", params: { id: workout.id } }
             ]
           });
-        }, 100);
-      }, 800);
-      
-      return true;
-    });
+        } else {
+          // Navigate only to WorkoutsList (stack index 0)
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "WorkoutsList" }]
+          });
+        }
+      }, 1000);
+    
+      return !!workout; 
+    });    
     
     setIsSaving(false);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      {/* Success Banner */}
-      <SuccessBanner 
-        message="Workout created successfully!" 
-        visible={showSuccess} 
-      />
       
       <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
         <View style={{ padding: 16 }}>
@@ -153,17 +191,37 @@ export default function CreateWorkout() {
             EXERCISES
           </Text>
           
-          {exercises.map((exercise, index) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              index={index}
-              onUpdate={updateExercise}
-              onRemove={removeExercise}
-            />
-          ))}
+          {items.map((item, index) => {
+            if (item.type === "EXERCISE") {
+              return (
+                <ExerciseCard
+                  key={`key-${index}`}
+                  exercise={item.data}
+                  index={index}
+                  onUpdate={updateExercise}
+                  onRemove={removeExercise}
+                />
+              );
+            }
+
+            if (item.type === "REST") {
+              return (
+                <RestCard
+                  key={`key-${index}`}
+                  value={item.data.restAfterExercise}
+                  onChange={(val) => {
+                    setItems(items.map((it, i) =>
+                      i === index && it.type === "REST"
+                        ? { ...it, data: { restAfterExercise: val } }
+                        : it
+                    ));
+                  }}
+                />
+              );
+            }
+          })}
           
-          {exercises.length === 0 && (
+          {items.length === 0 && (
             <View style={{ 
               alignItems: 'center', 
               padding: 32, 
@@ -197,7 +255,7 @@ export default function CreateWorkout() {
           mode="contained" 
           onPress={handleSave} 
           loading={isSaving}
-          disabled={!workoutName.trim() || exercises.length === 0}
+          disabled={!workoutName.trim() || items.length === 0}
           style={{ marginTop: 16 }}
           buttonColor={theme.primary}
           textColor={theme.background}

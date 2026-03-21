@@ -12,8 +12,6 @@ import {
   Card,
   Text,
   IconButton,
-  Portal,
-  Modal,
   Searchbar,
   Chip
 } from 'react-native-paper';
@@ -102,9 +100,8 @@ export default function CreateSession() {
   const addExercise = () => {
     const newExercise: WorkoutExercise = {
       id: Date.now().toString(),
-      name: '',
+      exerciseName: '',
       sets: [{ id: Date.now().toString(), reps: 0, weight: 0, restSeconds: 60 }],
-      restAfterExercise: 0
     };
     setExercises(prevExercises => [...prevExercises, newExercise]);
   };
@@ -142,7 +139,7 @@ export default function CreateSession() {
 
     // Convert to backend format
     const sessionExercises = exercises.map(exercise => ({
-      exerciseName: exercise.name,
+      exerciseName: exercise.exerciseName,
       sets: exercise.sets.map(set => ({
         reps: set.reps,
         weight: set.weight,
@@ -150,7 +147,7 @@ export default function CreateSession() {
         notes: set.notes
       })),
       exerciseOrder: 0, // Will be set by index
-      restAfterExerciseSeconds: exercise.restAfterExercise || 0
+      restAfterExerciseSeconds: 0
     }));
 
     // Set exercise order based on array index

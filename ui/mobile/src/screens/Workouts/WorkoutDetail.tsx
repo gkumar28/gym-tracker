@@ -4,7 +4,7 @@ import { Text, Card, Button, ActivityIndicator, FAB } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { workoutService } from '../../services/workoutService';
+import { Workout, workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import LoadingComponent from '../../components/LoadingComponent';
@@ -12,6 +12,7 @@ import ErrorComponent from '../../components/ErrorComponent';
 import { formatTimestamp } from '../../utils/generic';
 import ViewExerciseList from '../../components/ViewExerciseCard';
 import ViewExerciseCard from '../../components/ViewExerciseCard';
+import ViewRestCard from '../../components/ViewRestCard';
 
 type WorkoutDetailRouteProp = {
   params: {
@@ -27,7 +28,7 @@ export default function WorkoutDetail() {
     showNetworkErrorScreen: true,
   });
   
-  const [workout, setWorkout] = useState<any>(null);
+  const [workout, setWorkout] = useState<Workout>(null);
   const [isLoading, setIsLoading] = useState(false); // Start with false, show loading only during fetch
   const [isError, setIsError] = useState(false);
 
@@ -70,31 +71,36 @@ export default function WorkoutDetail() {
 
   if (!workout) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, backgroundColor: theme.background }}>
-        <Text style={{ fontSize: 18, fontWeight: '600', color: theme.text }}>Workout not found</Text>
-      </View>
+      <ErrorComponent message='Workout Not Found' />
     );
   }
 
   return (
-    <View style={{  flex: 1, backgroundColor: theme.background}}>
+    <View style={{ flex: 1, backgroundColor: theme.background}}>
       <ScrollView style={{ backgroundColor: theme.background }}>
       <View style={{ padding: 16 }}>
-        {workout.workoutExercises?.map((exercise, index) => {
-        console.log(exercise);
-        return (<ViewExerciseCard
-          key={exercise.id}
-          exercise={exercise}
-          index={index}
-        />)
-        })}
+      {workout.workoutExercises?.map((exercise, index) => (
+        <React.Fragment>
+          <ViewExerciseCard
+            key={`key-${index}`}
+            exercise={exercise}
+            index={index}
+          />
+
+          {index !== workout.workoutExercises.length - 1 && (
+            <ViewRestCard
+              value={exercise.restAfterExerciseSeconds}
+            />
+          )}
+        </React.Fragment>
+      ))}
       </View>
     </ScrollView>
     <Button 
           mode="contained" 
           onPress={() => nav.navigate('CreateSession', { workoutId: route.params.id })} 
           style={{ margin: 16, marginBottom: 8, width: 200 }}
-          buttonColor={theme.success}
+          buttonColor={theme.primary}
           textColor={theme.background}
         >
           Create Session

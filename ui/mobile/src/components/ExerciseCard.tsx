@@ -8,8 +8,8 @@ import ExerciseSearch from './ExerciseSearch';
 interface ExerciseCardProps {
   exercise: WorkoutExercise;
   index: number;
-  onUpdate: (exerciseId: string, updates: Partial<WorkoutExercise>) => void;
-  onRemove: (exerciseId: string) => void;
+  onUpdate: (exerciseId: number, updates: Partial<WorkoutExercise>) => void;
+  onRemove: (exerciseId: number) => void;
 }
 
 export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: ExerciseCardProps) {
@@ -23,23 +23,23 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
       weight: 50,
       restSeconds: 60
     };
-    onUpdate(exercise.id, {
+    onUpdate(index, {
       sets: [...exercise.sets, newSet]
     });
   };
 
-  const updateSet = (setId: string, updates: Partial<WorkoutSet>) => {
-    onUpdate(exercise.id, {
-      sets: exercise.sets.map(set => 
-        set.id === setId ? { ...set, ...updates } : set
+  const updateSet = (setIndex: number, updates: Partial<WorkoutSet>) => {
+    onUpdate(index, {
+      sets: exercise.sets.map((set, id) => 
+        id === setIndex ? { ...set, ...updates } : set
       )
     });
   };
 
-  const removeSet = (setId: string) => {
+  const removeSet = (setIndex: number) => {
     if (exercise.sets.length > 1) {
-      onUpdate(exercise.id, {
-        sets: exercise.sets.filter(set => set.id !== setId)
+      onUpdate(index, {
+        sets: exercise.sets.filter((set, id) => id !== setIndex)
       });
     }
   };
@@ -51,31 +51,21 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
       borderColor: theme.border, 
       borderWidth: 1 
     }}>
-      <Card.Title 
-        title={`Exercise ${index + 1}`}
-        subtitle={exercise.name || 'Untitled Exercise'}
-        right={() => (
-          <IconButton 
-            icon="delete" 
-            onPress={() => onRemove(exercise.id)}
-            iconColor={theme.error}
-          />
-        )}
-        titleStyle={{ color: theme.text }}
-        subtitleStyle={{ color: theme.textSecondary }}
-      />
       
       <Card.Content>
-        {/* Exercise Name */}
-        <TouchableOpacity 
-          onPress={() => setShowSearch(true)}
-          style={{ marginBottom: 16 }}
-        >
+        <Card.Content style={{flexDirection: 'row', marginBottom: 16, alignItems: 'center', padding: 0}}>
+          {/* Exercise Name */}
+          <TouchableOpacity 
+            onPress={() => setShowSearch(true)}
+            style={{flex: 1, paddingRight: 16 }}
+          >
           <TextInput
             label="Exercise Name"
-            value={exercise.name}
+            value={exercise.exerciseName}
             editable={false}
-            style={{ backgroundColor: theme.surface }}
+            style={{ backgroundColor: theme.surface,
+              flex: 1,
+            }}
             textColor={theme.text}
             cursorColor={theme.primary}
             selectionColor={theme.primary}
@@ -101,7 +91,14 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
               }
             }}
           />
-        </TouchableOpacity>
+          </TouchableOpacity>
+          <IconButton 
+              icon="delete" 
+              onPress={() => onRemove(index)}
+              iconColor={theme.error}
+              size={24}
+            />
+        </Card.Content>
 
         {/* Sets Section */}
         <View style={{ marginBottom: 16 }}>
@@ -134,7 +131,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
               <TextInput
                 label="Reps"
                 value={set.reps.toString()}
-                onChangeText={(reps) => updateSet(set.id, { reps: Number(reps) || 0 })}
+                onChangeText={(reps) => updateSet(setIndex, { reps: Number(reps) || 0 })}
                 keyboardType="numeric"
                 style={{ 
                   flex: 1, 
@@ -165,7 +162,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
               <TextInput
                 label="Weight (kg)"
                 value={set.weight.toString()}
-                onChangeText={(weight) => updateSet(set.id, { weight: Number(weight) || 0 })}
+                onChangeText={(weight) => updateSet(setIndex, { weight: Number(weight) || 0 })}
                 keyboardType="numeric"
                 style={{ 
                   flex: 1, 
@@ -196,7 +193,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
               <TextInput
                 label="Rest (s)"
                 value={set.restSeconds.toString()}
-                onChangeText={(restSeconds) => updateSet(set.id, { restSeconds: Number(restSeconds) || 0 })}
+                onChangeText={(restSeconds) => updateSet(setIndex, { restSeconds: Number(restSeconds) || 0 })}
                 keyboardType="numeric"
                 style={{ 
                   flex: 1, 
@@ -227,7 +224,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
               {exercise.sets.length > 1 && (
                 <IconButton
                   icon="delete"
-                  onPress={() => removeSet(set.id)}
+                  onPress={() => removeSet(setIndex)}
                   size={20}
                   iconColor={theme.error}
                 />
@@ -249,7 +246,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
       <ExerciseSearch
         visible={showSearch}
         onDismiss={() => setShowSearch(false)}
-        onSelectExercise={(exerciseName) => onUpdate(exercise.id, { name: exerciseName })}
+        onSelectExercise={(exerciseName) => onUpdate(index, { exerciseName: exerciseName })}
         placeholder="Search exercises..."
       />
     </Card>

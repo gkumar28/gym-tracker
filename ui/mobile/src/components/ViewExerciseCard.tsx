@@ -1,22 +1,10 @@
 import React from "react";
 import { View } from "react-native";
-import { Card, Text } from "react-native-paper";
+import { Card, TextInput, Text } from "react-native-paper";
 import { useTheme } from "../hooks/useTheme";
-
-interface Set {
-  reps: number;
-  weight: number;
-  restSeconds: number;
-}
-
-interface Exercise {
-  id: number;
-  exerciseName: string;
-  sets: Set[];
-}
-
+import { WorkoutExercise } from "../types/workout";
 interface Props {
-  exercise: Exercise;
+  exercise: WorkoutExercise;
   index: number;
 }
 
@@ -62,53 +50,48 @@ export default function ViewExerciseCard({ exercise, index }: Props) {
               borderRadius: 2
             }}
           >
-            <Text
-              style={{
-                color: theme.textSecondary,
+
+            <TextInput 
+            label="Reps"
+            value={`${set.reps}` || "-"}
+            editable={false}
+            style={{flex: 1,
+                color: theme.text, 
                 backgroundColor: theme.background,
-                padding: 8,
-                borderRadius: 8,
-                margin: 1
+                borderColor: theme.border,
+                margin: 5,
+                height: 40
               }}
-            >
-              {setIndex + 1}
-            </Text>
+            outlineColor={theme.border}
+            mode="outlined" />
 
-            <Text style={{ flex: 1, 
+            <TextInput 
+            label="Weight (kg)"
+            value={`${set.weight}` || "0"}
+            editable={false}
+            style={{flex: 1,
                 color: theme.text, 
                 backgroundColor: theme.background,
-                padding: 8,
-                borderRadius: 8,
-                borderWidth: 1,
                 borderColor: theme.border,
-                margin: 1
-              }}>
-              Reps: {set.reps ?? "-"}
-            </Text>
+                margin: 5,
+                height: 40
+              }}
+            outlineColor={theme.border}
+            mode="outlined" />
 
-            <Text style={{ flex: 1, 
+            <TextInput 
+            label="Rest (s)"
+            value={`${set.restSeconds}` || "0"}
+            editable={false}
+            style={{flex: 1,
                 color: theme.text, 
                 backgroundColor: theme.background,
-                padding: 8,
-                borderRadius: 8,
-                borderWidth: 1,
                 borderColor: theme.border,
-                margin: 1
-              }}>
-              Weight: {set.weight ?? "-"} kg
-            </Text>
-
-            <Text style={{ flex: 1, 
-                color: theme.text, 
-                backgroundColor: theme.background,
-                padding: 8,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: theme.border,
-                margin: 1
-              }}>
-              Rest: {set.restSeconds ?? 0}s
-            </Text>
+                margin: 5,
+                height: 40
+              }}
+            outlineColor={theme.border}
+            mode="outlined" />
           </View>
         ))}
       </Card.Content>

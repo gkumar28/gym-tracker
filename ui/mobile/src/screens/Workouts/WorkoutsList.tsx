@@ -121,7 +121,7 @@ export default function WorkoutsList() {
     </View>
 
     {/* Workout List */}
-    <View style={{ padding: 16 }}>
+    <View style={{ padding: 16, flex: 1 }}>
 
       <Text
         style={{
@@ -133,54 +133,64 @@ export default function WorkoutsList() {
       >
         Recent Workouts
       </Text>
-
+      
       <FlatList
-        data={workouts?.items || []}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Card
-            style={{
-              marginBottom: 8,
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-              borderWidth: 1
-            }}
-          >
-            <Card.Title
-              title={item.name}
-              subtitle={`${item.exerciseCount || 0} exercises`}
-            />
-
-            <Card.Actions>
-              <Button
-                mode="contained"
-                onPress={() => navigateToWorkout(item.id)}
-                buttonColor={theme.primary}
-                compact
-              >
-                View Workout
-              </Button>
-            </Card.Actions>
-          </Card>
-        )}
-        ListEmptyComponent={
-          <View
-            style={{
-              alignItems: 'center',
-              padding: 20
-            }}
-          >
-            <Text
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          data={workouts?.items || []}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Card
               style={{
-                fontSize: 16,
-                color: theme.textSecondary
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+                borderWidth: 1
               }}
             >
-              No workouts found
-            </Text>
-          </View>
-        }
-      />
+              <Card.Title
+                title={item.name}
+                subtitle={`${item.exerciseCount || 0} exercise(s)`}
+                titleStyle={{
+                    color: theme.text
+                }}
+                subtitleStyle={{
+                  color: theme.textSecondary
+                }}
+              />
+
+              <Card.Actions>
+                <Button
+                  mode="contained"
+                  onPress={() => navigateToWorkout(item.id)}
+                  buttonColor={theme.primary}
+                  compact
+                >
+                  View Workout
+                </Button>
+              </Card.Actions>
+            </Card>
+          )}
+          ListEmptyComponent={
+            <View
+              style={{
+                alignItems: 'center',
+                padding: 20
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: theme.textSecondary
+                }}
+              >
+                No workouts found
+              </Text>
+            </View>
+          }
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        />
     </View>
 
     {/* Create Workout FAB */}
