@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -27,7 +27,7 @@ public class Session {
 
     @Column(name = "session_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date sessionDate;
+    private LocalDateTime sessionDate;
 
     @Column(length = 1000)
     private String notes;
@@ -37,13 +37,13 @@ public class Session {
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         if (sessionDate == null) {
-            sessionDate = new Date();
+            sessionDate = LocalDateTime.now();
         }
-        createdAt = new Date();
+        createdAt = LocalDateTime.now();
     }
 }

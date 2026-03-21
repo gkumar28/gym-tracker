@@ -8,9 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @NoArgsConstructor
@@ -28,7 +30,8 @@ public class SessionSO {
     private List<SessionExerciseSO> sessionExercises = new ArrayList<>();
 
     @NotNull(message = "Session date cannot be null")
-    private Date sessionDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime sessionDate;
 
     @Size(max = 1000, message = "Notes cannot exceed 1000 characters")
     private String notes;
@@ -36,5 +39,6 @@ public class SessionSO {
     @Min(value = 0, message = "Duration minutes cannot be negative")
     private Integer durationMinutes;
 
-    private Date createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
 }

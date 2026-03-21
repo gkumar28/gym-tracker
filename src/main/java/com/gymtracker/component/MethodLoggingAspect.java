@@ -17,19 +17,13 @@ public class MethodLoggingAspect {
     public Object logRequestTiming(ProceedingJoinPoint pjp) throws Throwable {
         long start = System.nanoTime();
         String methodName = pjp.getSignature().toShortString();
-
-        if (log.isTraceEnabled()) {
-            log.trace("→ REQUEST START: {}", methodName);
-        }
+        log.info("→ REQUEST START: {}", methodName);
 
         try {
             return pjp.proceed();
         } finally {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-
-            if (log.isTraceEnabled()) {
-                log.trace("← REQUEST COMPLETE: {} with total time: {} ms", methodName, durationMs);
-            }
+            log.info("← REQUEST COMPLETE: {} with total time: {} ms", methodName, durationMs);
         }
     }
 
@@ -38,19 +32,13 @@ public class MethodLoggingAspect {
     public Object logServiceTiming(ProceedingJoinPoint pjp) throws Throwable {
         long start = System.nanoTime();
         String methodName = pjp.getSignature().toShortString();
-
-        if (log.isTraceEnabled()) {
-            log.trace("→ SERVICE: {}", methodName);
-        }
+        log.info("→ SERVICE: {}", methodName);
 
         try {
             return pjp.proceed();
         } finally {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-
-            if (log.isTraceEnabled()) {
-                log.trace("← SERVICE: {} with total time: {} ms", methodName, durationMs);
-            }
+            log.info("← SERVICE: {} with total time: {} ms", methodName, durationMs);
         }
     }
 
@@ -60,18 +48,13 @@ public class MethodLoggingAspect {
         long start = System.nanoTime();
         
         String methodName = pjp.getSignature().toShortString();
-        if (log.isTraceEnabled()) {
-            log.trace("→ REPOSITORY: {}", methodName);
-        }
+        log.info("→ REPOSITORY: {}", methodName);
 
         try {
             return pjp.proceed();
         } finally {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-
-            if (log.isTraceEnabled()) {
-                log.trace("← REPOSITORY: {} with total time: {} ms", methodName, durationMs);
-            }
+            log.info("← REPOSITORY: {} with total time: {} ms", methodName, durationMs);
         }
     }
 }
