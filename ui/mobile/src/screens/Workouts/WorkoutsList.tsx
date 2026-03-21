@@ -18,7 +18,6 @@ import { RootStackParamList } from '../../navigation';
 import { debounce } from 'lodash';
 import LoadingComponent from '../../components/LoadingComponent';
 import ErrorComponent from '../../components/ErrorComponent';
-import { Color } from 'react-native/types_generated/Libraries/Animated/AnimatedExports';
 
 type WorkoutListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
