@@ -4,6 +4,7 @@ import com.gymtracker.entity.Workout;
 import com.gymtracker.schemaobject.WorkoutSO;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -17,8 +18,8 @@ class WorkoutMapperTest {
         Workout workout = new Workout();
         workout.setId(1L);
         workout.setName("Chest Workout");
-        workout.setCreatedAt(new Date());
-        workout.setUpdatedAt(new Date());
+        workout.setCreatedAt(LocalDateTime.now());
+        workout.setUpdatedAt(LocalDateTime.now());
 
         WorkoutSO so = WorkoutMapper.toSO(workout);
 
@@ -40,8 +41,8 @@ class WorkoutMapperTest {
         Workout workout = new Workout();
         workout.setId(1L);
         workout.setName("Chest Workout");
-        workout.setCreatedAt(new Date());
-        workout.setUpdatedAt(new Date());
+        workout.setCreatedAt(LocalDateTime.now());
+        workout.setUpdatedAt(LocalDateTime.now());
 
         WorkoutSO so = WorkoutMapper.toSOWithoutNestedData(workout);
 
@@ -65,14 +66,14 @@ class WorkoutMapperTest {
         Workout workout1 = new Workout();
         workout1.setId(1L);
         workout1.setName("Chest Workout");
-        workout1.setCreatedAt(new Date());
-        workout1.setUpdatedAt(new Date());
+        workout1.setCreatedAt(LocalDateTime.now());
+        workout1.setUpdatedAt(LocalDateTime.now());
 
         Workout workout2 = new Workout();
         workout2.setId(2L);
         workout2.setName("Leg Workout");
-        workout2.setCreatedAt(new Date());
-        workout2.setUpdatedAt(new Date());
+        workout2.setCreatedAt(LocalDateTime.now());
+        workout2.setUpdatedAt(LocalDateTime.now());
 
         List<Workout> workouts = Arrays.asList(workout1, workout2);
         List<WorkoutSO> workoutSOs = WorkoutMapper.toSOListWithoutNestedData(workouts);
@@ -99,8 +100,8 @@ class WorkoutMapperTest {
         WorkoutSO so = new WorkoutSO();
         so.setId(1L);
         so.setName("Chest Workout");
-        so.setCreatedAt(new Date());
-        so.setUpdatedAt(new Date());
+        so.setCreatedAt(LocalDateTime.now());
+        so.setUpdatedAt(LocalDateTime.now());
 
         Workout workout = WorkoutMapper.toEntity(so);
 

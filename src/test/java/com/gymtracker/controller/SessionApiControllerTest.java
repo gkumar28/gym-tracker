@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -34,18 +36,18 @@ class SessionApiControllerTest {
         sessionSO = new SessionSO();
         sessionSO.setId(1L);
         sessionSO.setWorkoutId(1L);
-        sessionSO.setSessionDate(new Date());
+        sessionSO.setSessionDate(LocalDateTime.now());
     }
 
     @Test
     void testCreateSession() {
         SessionSO newSessionSO = new SessionSO();
         newSessionSO.setWorkoutId(1L);
-        newSessionSO.setSessionDate(new Date());
+        newSessionSO.setSessionDate(LocalDateTime.now());
         SessionSO createdSessionSO = new SessionSO();
         createdSessionSO.setId(2L);
         createdSessionSO.setWorkoutId(1L);
-        createdSessionSO.setSessionDate(new Date());
+        createdSessionSO.setSessionDate(LocalDateTime.now());
 
         when(sessionService.createSession(newSessionSO)).thenReturn(createdSessionSO);
 

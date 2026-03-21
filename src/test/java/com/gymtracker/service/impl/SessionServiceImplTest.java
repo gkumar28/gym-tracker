@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -46,12 +47,12 @@ class SessionServiceImplTest {
         session = new Session();
         session.setId(1L);
         session.setWorkout(workout);
-        session.setSessionDate(new Date());
+        session.setSessionDate(LocalDateTime.now());
 
         sessionSO = new SessionSO();
         sessionSO.setId(1L);
         sessionSO.setWorkoutId(1L);
-        sessionSO.setSessionDate(new Date());
+        sessionSO.setSessionDate(LocalDateTime.now());
     }
 
     @Test
@@ -71,10 +72,10 @@ class SessionServiceImplTest {
     void testCreateSession_WithoutWorkout() {
         SessionSO sessionSOWithoutWorkout = new SessionSO();
         sessionSOWithoutWorkout.setWorkoutId(1L); // Set workoutId to avoid null pointer
-        sessionSOWithoutWorkout.setSessionDate(new Date());
+        sessionSOWithoutWorkout.setSessionDate(LocalDateTime.now());
         Session sessionWithoutWorkout = new Session();
         sessionWithoutWorkout.setId(2L);
-        sessionWithoutWorkout.setSessionDate(new Date());
+        sessionWithoutWorkout.setSessionDate(LocalDateTime.now());
 
         when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
         when(sessionRepository.save(any(Session.class))).thenReturn(sessionWithoutWorkout);

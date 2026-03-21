@@ -5,6 +5,7 @@ import com.gymtracker.entity.Workout;
 import com.gymtracker.schemaobject.SessionSO;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +20,7 @@ class SessionMapperTest {
         Session session = new Session();
         session.setId(1L);
         session.setWorkout(workout);
-        session.setSessionDate(new Date());
+        session.setSessionDate(LocalDateTime.now());
         session.setNotes("Good session");
         session.setDurationMinutes(60);
 
@@ -37,7 +38,7 @@ class SessionMapperTest {
     void testToSO_WithoutWorkout() {
         Session session = new Session();
         session.setId(1L);
-        session.setSessionDate(new Date());
+        session.setSessionDate(LocalDateTime.now());
 
         SessionSO so = SessionMapper.toSO(session);
 
@@ -59,7 +60,7 @@ class SessionMapperTest {
         SessionSO so = new SessionSO();
         so.setId(1L);
         so.setWorkoutId(1L);
-        so.setSessionDate(new Date());
+        so.setSessionDate(LocalDateTime.now());
         so.setNotes("Good session");
         so.setDurationMinutes(60);
 
