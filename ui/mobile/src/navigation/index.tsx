@@ -12,6 +12,8 @@ import CreateSession from '../screens/Sessions/CreateSession';
 import ExerciseSearch from '../screens/Exercises/ExerciseSearch';
 import { ErrorScreen } from '../screens/ErrorScreen';
 import { useTheme } from '../hooks/useTheme';
+import UpdateWorkout from '../screens/Workouts/UpdateWorkout';
+import { Workout } from '../services/workoutService';
 
 // Create a navigation ref that can be accessed globally
 export const navigationRef = React.createRef<any>();
@@ -48,10 +50,11 @@ export default function RootNavigator() {
 export type RootStackParamList = {
   Home: undefined;
   WorkoutsList: { refresh?: boolean };
-  WorkoutDetail: { id: string };
+  WorkoutDetail: { id: number, workoutName: string };
   CreateWorkout: undefined;
-  SessionList: { workoutId?: string };
-  CreateSession: { workoutId?: string };
+  UpdateWorkout: {workout: Workout};
+  SessionList: { workoutId?: number };
+  CreateSession: { workoutId?: number };
   Error: { error?: string };
 };
 
@@ -79,8 +82,19 @@ function WorkoutsStack() {
       }}
     >
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts', headerShown: false }} />
-      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={{ title: 'Workout Details', headerShown: true }} />
+      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={({route}) => { 
+        return {title: `Workout Details for ${route.params.workoutName}`, headerShown: true }
+      }} />
       <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout', headerShown: true }} />
+      <Stack.Screen name="UpdateWorkout" options={({route}) => {  
+        return {title: `Update ${route.params.workout?.name}`, headerShown: true } 
+      }}>
+        {({ route }) => (
+          <UpdateWorkout
+            workout={route.params.workout}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="SessionList" component={SessionList} options={{ title: 'Sessions', headerShown: true }} />
       <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session', headerShown: true }} />
       <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />

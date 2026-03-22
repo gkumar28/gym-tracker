@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, Card, Button, ActivityIndicator, FAB } from 'react-native-paper';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { Workout, workoutService } from '../../services/workoutService';
@@ -9,20 +9,12 @@ import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import LoadingComponent from '../../components/LoadingComponent';
 import ErrorComponent from '../../components/ErrorComponent';
-import { formatTimestamp } from '../../utils/generic';
-import ViewExerciseList from '../../components/ViewExerciseCard';
 import ViewExerciseCard from '../../components/ViewExerciseCard';
 import ViewRestCard from '../../components/ViewRestCard';
 
-type WorkoutDetailRouteProp = {
-  params: {
-    id: string;
-  };
-};
-
 export default function WorkoutDetail() {
-  const route = useRoute() as WorkoutDetailRouteProp;
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList, 'WorkoutDetail'>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'WorkoutDetail'>>();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
@@ -125,7 +117,7 @@ export default function WorkoutDetail() {
         bottom: 0,
         backgroundColor: theme.primary,
       }}
-      onPress={() => nav.navigate('CreateWorkout')}
+      onPress={() => nav.navigate('UpdateWorkout', { workout: workout})}
     />
     </View>
   );

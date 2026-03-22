@@ -76,8 +76,8 @@ export default function WorkoutsList() {
     });
   };
 
-  const navigateToWorkout = (id: string) => {
-    navigation.navigate('WorkoutDetail', { id });
+  const navigateToWorkout = (id: string, workoutName: string) => {
+    navigation.navigate('WorkoutDetail', { id, workoutName });
   };
 
   const navigateToCreateWorkout = () => {
@@ -122,22 +122,12 @@ export default function WorkoutsList() {
 
     {/* Workout List */}
     <View style={{ padding: 16, flex: 1 }}>
-
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: '600',
-          marginBottom: 16,
-          color: theme.text
-        }}
-      >
-        Recent Workouts
-      </Text>
       
       <FlatList
           initialNumToRender={10}
           maxToRenderPerBatch={10}
           windowSize={5}
+          showsVerticalScrollIndicator={false}
           removeClippedSubviews={true}
           data={workouts?.items || []}
           keyExtractor={(item) => item.id}
@@ -163,7 +153,7 @@ export default function WorkoutsList() {
               <Card.Actions>
                 <Button
                   mode="contained"
-                  onPress={() => navigateToWorkout(item.id)}
+                  onPress={() => navigateToWorkout(item.id, item.name)}
                   buttonColor={theme.primary}
                   compact
                 >

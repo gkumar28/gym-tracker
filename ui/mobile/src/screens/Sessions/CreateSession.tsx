@@ -45,7 +45,7 @@ export default function CreateSession() {
   const [workoutDetails, setWorkoutDetails] = useState<any>(null);
   
   // Workout selection state
-  const [workoutId, setWorkoutId] = useState<string | null>((route.params as any)?.workoutId || null);
+  const [workoutId, setWorkoutId] = useState<number | null>((route.params as any)?.workoutId || null);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [showWorkoutSearch, setShowWorkoutSearch] = useState(false);
   const [workoutSearchQuery, setWorkoutSearchQuery] = useState('');

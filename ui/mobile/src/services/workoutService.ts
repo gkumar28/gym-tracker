@@ -72,7 +72,7 @@ export class WorkoutService {
   }
 
   // Get workout by ID
-  async getWorkoutById(id: string): Promise<Workout | null> {
+  async getWorkoutById(id: number): Promise<Workout | null> {
     try {
       const response = await baseApi.get(`/workout/${id}`);
       return response.data;
