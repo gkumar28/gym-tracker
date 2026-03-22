@@ -225,7 +225,7 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
                   flatListProps={{
                     showsVerticalScrollIndicator: false,
                   }}
-                  renderItem={(item, is) => (
+                  renderItem={(item) => (
                     <View style={{
                       padding: 16,
                       backgroundColor: theme.surface
