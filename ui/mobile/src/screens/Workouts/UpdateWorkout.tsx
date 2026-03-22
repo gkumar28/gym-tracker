@@ -4,7 +4,7 @@ import { TextInput, Button, Text, IconButton, Card } from 'react-native-paper';
 import { workoutService } from '../../services/workoutService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { useNavigation, useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import ExerciseCard from '../../components/ExerciseCard';
@@ -18,7 +18,6 @@ type UpdateWorkoutProps = {
 
 export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'UpdateWorkout'>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'UpdateWorkout'>>();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
@@ -31,7 +30,7 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   useEffect(() => {
     setWorkoutName(workout.name);
     setItems(workout.workoutItems);
-  })
+  }, [workout])
 
   const addExercise = () => {
     const newExercise: WorkoutExercise = {
@@ -51,6 +50,7 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
         { type: "REST", data: rest}, 
         { type: "EXERCISE", data: newExercise}]);
     }
+    console.log(1)
   };
 
   const updateExercise = (index: number, updates: Partial<WorkoutExercise>) => {
@@ -150,42 +150,36 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
+    <View style={{ backgroundColor: theme.background, padding: 16, flex: 1 }}>
       
-      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={{ padding: 16 }}>
-        {/* Workout Name Section */}
         <Card style={{ marginBottom: 16, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
-          <Card.Content>
-            <TextInput 
-              label="Workout Name" 
-              value={workoutName}
-              onChangeText={setWorkoutName}
-              style={{ backgroundColor: theme.surface }}
-              textColor={theme.text}
-              cursorColor={theme.primary}
-              selectionColor={theme.primary}
-              activeOutlineColor={theme.primary}
-              outlineColor={theme.border}
-              mode="outlined"
-              theme={{
-                colors: {
-                  text: theme.text,
-                  placeholder: theme.textSecondary,
-                  primary: theme.primary,
-                  background: theme.surface,
-                  surface: theme.surface,
-                  onSurface: theme.text,
-                  outline: theme.border,
-                }
-              }}
-            />
-          </Card.Content>
+            <Card.Content>
+                <TextInput 
+                    label="Workout Name" 
+                    value={workoutName}
+                    onChangeText={setWorkoutName}
+                    style={{ backgroundColor: theme.surface }}
+                    textColor={theme.text}
+                    cursorColor={theme.primary}
+                    selectionColor={theme.primary}
+                    activeOutlineColor={theme.primary}
+                    outlineColor={theme.border}
+                    mode="outlined"
+                    theme={{
+                    colors: {
+                        text: theme.text,
+                        placeholder: theme.textSecondary,
+                        primary: theme.primary,
+                        background: theme.surface,
+                        surface: theme.surface,
+                        onSurface: theme.text,
+                        outline: theme.border,
+                    }
+                    }}
+                />
+            </Card.Content>
         </Card>
-
-        {/* Exercises Section */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ 
+        <Text style={{ 
             fontSize: 18, 
             fontWeight: '600', 
             color: theme.text, 
@@ -193,88 +187,86 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
             letterSpacing: 1
           }}>
             EXERCISES
-          </Text>
-          
-          {items.map((item, index) => {
+        </Text>
+
+        <ScrollView style={{ marginBottom: 16 }} showsVerticalScrollIndicator={false}>
+            {items.map((item, index) => {
             if (item.type === "EXERCISE") {
-              return (
+                return (
                 <ExerciseCard
-                  key={`key-${index}`}
-                  exercise={item.data}
-                  index={index}
-                  onUpdate={updateExercise}
-                  onRemove={removeExercise}
+                    key={`key-${index}`}
+                    exercise={item.data}
+                    index={index}
+                    onUpdate={updateExercise}
+                    onRemove={removeExercise}
                 />
-              );
+                );
             }
 
             if (item.type === "REST") {
-              return (
+                return (
                 <RestCard
-                  key={`key-${index}`}
-                  value={item.data.restAfterExercise}
-                  onChange={(val) => {
+                    key={`key-${index}`}
+                    value={item.data.restAfterExercise}
+                    onChange={(val) => {
                     setItems(items.map((it, i) =>
-                      i === index && it.type === "REST"
+                        i === index && it.type === "REST"
                         ? { ...it, data: { restAfterExercise: val } }
                         : it
                     ));
-                  }}
+                    }}
                 />
-              );
+                );
             }
-          })}
-          
-          {items.length === 0 && (
+            })}
+            
+            {items.length === 0 && (
             <View style={{ 
-              alignItems: 'center', 
-              padding: 32, 
-              backgroundColor: theme.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.border,
-              borderStyle: 'dashed'
+                alignItems: 'center', 
+                padding: 32, 
+                backgroundColor: theme.surface,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.border,
+                borderStyle: 'dashed'
             }}>
-              <Text style={{ color: theme.textSecondary, marginBottom: 8 }}>
+                <Text style={{ color: theme.textSecondary, marginBottom: 8 }}>
                 No exercises yet
-              </Text>
-              <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
+                </Text>
+                <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
                 Add your first exercise to get started
-              </Text>
+                </Text>
             </View>
-          )}
-          
-          <Button 
-            mode="outlined" 
-            onPress={addExercise}
-            style={{ marginTop: 12 }}
-            textColor={theme.primary}
-          >
-            + Add Exercise
-          </Button>
-        </View>
+            )}
+        </ScrollView>
 
+        <Button 
+           mode="outlined" 
+           onPress={addExercise}
+           style={{ marginTop: 12 }}
+           textColor={theme.primary}
+         >
+           + Add Exercise
+        </Button>
         {/* Save Button */}
         <Button 
-          mode="contained" 
-          onPress={handleSave} 
-          loading={isSaving}
-          disabled={!workoutName.trim() || items.length === 0}
-          style={{ marginTop: 16 }}
-          buttonColor={theme.primary}
-          textColor={theme.background}
-          theme={{
+        mode="contained" 
+        onPress={handleSave} 
+        loading={isSaving}
+        disabled={!workoutName.trim() || items.length === 0}
+        style={{ marginTop: 16 }}
+        buttonColor={theme.primary}
+        textColor={theme.background}
+        theme={{
             colors: {
-              primary: theme.primary,
-              surfaceDisabled: theme.border,
-              onSurfaceDisabled: theme.textSecondary
+            primary: theme.primary,
+            surfaceDisabled: theme.border,
+            onSurfaceDisabled: theme.textSecondary
             }
-          }}
+        }}
         >
-          Save Workout
+            Save Workout
         </Button>
-      </View>
-      </ScrollView>
     </View>
   );
 }
