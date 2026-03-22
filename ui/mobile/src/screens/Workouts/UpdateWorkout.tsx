@@ -30,6 +30,7 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   
   useEffect(() => {
     setWorkoutName(workout.name);
+    setItems(workout.workoutItems);
   })
 
   const addExercise = () => {
