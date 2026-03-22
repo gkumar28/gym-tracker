@@ -13,9 +13,12 @@ import ViewExerciseCard from '../../components/ViewExerciseCard';
 import ViewRestCard from '../../components/ViewRestCard';
 import { Workout } from '../../types/workout';
 
-export default function WorkoutDetail() {
+export type WorkoutDetailProps = {
+  id: number;
+}
+
+export default function WorkoutDetail({ id }: WorkoutDetailProps) {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList, 'WorkoutDetail'>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'WorkoutDetail'>>();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
@@ -29,7 +32,7 @@ export default function WorkoutDetail() {
     try {
       setIsLoading(true);
       setIsError(false);
-      const data = await workoutService.getWorkoutById(route.params.id);
+      const data = await workoutService.getWorkoutById(id);
       setWorkout(data);
     } catch (err) {
       setIsError(true);
@@ -40,13 +43,7 @@ export default function WorkoutDetail() {
 
   useEffect(() => {
     loadWorkout();
-  }, [route.params.id]);
-
-  useLayoutEffect(() => {
-    nav.setOptions({
-      title: workout?.name || "Workout Details"
-    });
-  }, [nav, workout]);
+  }, [id]);
 
   const handleRefresh = async () => {
     await execute(async () => {
@@ -91,7 +88,7 @@ export default function WorkoutDetail() {
     </ScrollView>
     <Button 
           mode="contained" 
-          onPress={() => nav.navigate('CreateSession', { workoutId: route.params.id })} 
+          onPress={() => nav.navigate('CreateSession', { workoutId: id })} 
           style={{ margin: 16, marginBottom: 8, width: 200 }}
           buttonColor={theme.primary}
           textColor={theme.background}
@@ -101,7 +98,7 @@ export default function WorkoutDetail() {
 
     <Button 
       mode="contained" 
-      onPress={() => nav.navigate('SessionList', { workoutId: route.params.id })} 
+      onPress={() => nav.navigate('SessionList', { workoutId: id })} 
       style={{ margin: 16, marginTop: 8, width: 200 }}
       buttonColor={theme.primary}
       textColor={theme.background}

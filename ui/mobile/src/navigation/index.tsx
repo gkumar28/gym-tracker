@@ -82,9 +82,15 @@ function WorkoutsStack() {
       }}
     >
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts', headerShown: false }} />
-      <Stack.Screen name="WorkoutDetail" component={WorkoutDetail} options={({route}) => { 
+      <Stack.Screen name="WorkoutDetail" options={({route}) => { 
         return {title: `Workout Details for ${route.params.workoutName}`, headerShown: true }
-      }} />
+      }}>
+        {({ route }) => (
+          <WorkoutDetail
+            id={route.params.id}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="CreateWorkout" component={CreateWorkout} options={{ title: 'Create Workout', headerShown: true }} />
       <Stack.Screen name="UpdateWorkout" options={({route}) => {  
         return {title: `Update ${route.params.workout?.name}`, headerShown: true } 
