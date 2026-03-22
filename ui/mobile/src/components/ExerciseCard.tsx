@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card, Text, TextInput, Button, IconButton } from 'react-native-paper';
 import { useTheme } from '../hooks/useTheme';
-import { WorkoutExercise, WorkoutSet } from '../types/workout';
 import ExerciseSearch from './ExerciseSearch';
+import { ExerciseSet, Set } from '../types/common';
 
 interface ExerciseCardProps {
-  exercise: WorkoutExercise;
+  exercise: ExerciseSet;
   index: number;
-  onUpdate: (exerciseId: number, updates: Partial<WorkoutExercise>) => void;
+  onUpdate: (exerciseId: number, updates: Partial<ExerciseSet>) => void;
   onRemove: (exerciseId: number) => void;
 }
 
@@ -17,7 +17,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
   const [showSearch, setShowSearch] = useState(false);
 
   const addSet = () => {
-    const newSet: WorkoutSet = {
+    const newSet: Set = {
       id: Date.now().toString(),
       reps: 8,
       weight: 50,
@@ -28,7 +28,7 @@ export default function ExerciseCard({ exercise, index, onUpdate, onRemove }: Ex
     });
   };
 
-  const updateSet = (setIndex: number, updates: Partial<WorkoutSet>) => {
+  const updateSet = (setIndex: number, updates: Partial<Set>) => {
     onUpdate(index, {
       sets: exercise.sets.map((set, id) => 
         id === setIndex ? { ...set, ...updates } : set

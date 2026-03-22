@@ -112,7 +112,14 @@ function WorkoutsStack() {
           />
         )}
       </Stack.Screen>
-      <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session', headerShown: true }} />
+      <Stack.Screen name="CreateSession" options={{title: `Create Session`, headerShown: true }}>
+        {({ route }) => (
+          <CreateSession
+            workoutId={route.params.workoutId}
+            workoutName={route.params.workoutName}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />
     </Stack.Navigator>
   );

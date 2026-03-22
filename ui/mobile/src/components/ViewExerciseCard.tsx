@@ -2,9 +2,9 @@ import React from "react";
 import { View } from "react-native";
 import { Card, TextInput, Text } from "react-native-paper";
 import { useTheme } from "../hooks/useTheme";
-import { WorkoutExercise } from "../types/workout";
+import { ExerciseSet } from "../types/common";
 interface Props {
-  exercise: WorkoutExercise;
+  exercise: ExerciseSet;
   index: number;
 }
 

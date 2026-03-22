@@ -11,6 +11,7 @@ import { createPaperTheme } from './src/theme/theme';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppHeader from './src/components/AppHeader';
 import { ToastContainer } from "react-toastify";
+import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +43,9 @@ export default function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
+        <AutocompleteDropdownContextProvider>
           <AppContent />
+        </AutocompleteDropdownContextProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

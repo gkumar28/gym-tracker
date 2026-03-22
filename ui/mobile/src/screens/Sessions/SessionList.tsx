@@ -192,13 +192,6 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
 
       {/* Sessions List */}
       <View style={{ padding: 16 }}>
-        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 16, color: theme.text }}>
-          {selectedWorkoutId
-            ? `Sessions for Workout ${selectedWorkoutId}`
-            : 'Recent Sessions'
-          }
-        </Text>
-        
         <FlatList
           data={sessionsData.items}
           keyExtractor={(item) => item.id.toString()}
