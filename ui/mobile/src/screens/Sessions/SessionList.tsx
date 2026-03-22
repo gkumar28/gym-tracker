@@ -1,86 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, ScrollView } from 'react-native';
-import { Card, Text, Button, ActivityIndicator, IconButton, Searchbar, Chip, Portal, Modal, FAB } from 'react-native-paper';
-import { sessionService, Session, SessionSearchParams, PaginatedSessionResponse } from '../../services/sessionService';
+import { Card, Text, Button, IconButton, Searchbar, Chip, Portal, Modal, FAB } from 'react-native-paper';
+import { sessionService, SessionSearchParams } from '../../services/sessionService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
-import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { debounce } from 'lodash';
 import LoadingComponent from '../../components/LoadingComponent';
 import ErrorComponent from '../../components/ErrorComponent';
+import { useNavigation } from '@react-navigation/native';
+import { PaginatedResponse } from '../../types/api';
+import { Session } from '../../types/session';
 
-type SessionListRouteProp = {
-  params?: {
-    workoutId?: string;
-  };
-};
+type SessionListProps = { workoutId?: number, workoutName?: string }
 
-type SessionListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SessionList'>;
-
-export default function SessionList() {
-  const route = useRoute() as SessionListRouteProp;
-  const navigation = useNavigation<SessionListNavigationProp>();
+export default function SessionList({ workoutId, workoutName }: SessionListProps) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'SessionList'>>();
   const theme = useTheme();
   const { execute } = useApiCall({
     showNetworkErrorScreen: true,
   });
 
-  const [sessionsData, setSessionsData] = useState<PaginatedSessionResponse | null>(null);
+  const [sessionsData, setSessionsData] = useState<PaginatedResponse<Session> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null);
   const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null);
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(null);
+  const [selectedWorkoutName, setSelectedWorkoutName] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageNo, setPageNo] = useState<number>(0);
+  const [searchParams, setSearchParams] = useState<SessionSearchParams | null>(null);
+  const [performSearch, setPerformSearch] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const loadSessions = async () => {
+    if (!performSearch) { return; }
 
-  // Build search params
-  const searchParams: SessionSearchParams = {
-    search: searchQuery || undefined,
-    workoutName: searchQuery || undefined,
-    workoutId: selectedWorkoutId || route.params?.workoutId || undefined,
-    dateFrom: selectedDateFrom || undefined,
-    dateTo: selectedDateTo || undefined,
-    size: 20,
-    page: 0,
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      setSearchParams({
+        search: searchQuery,
+        dateFrom: selectedDateFrom,
+        dateTo: selectedDateTo,
+        workoutId: selectedWorkoutId,
+        size: pageSize,
+        page: pageNo
+      })
+      
+      const data = await sessionService.searchSessions(searchParams);
+      setSessionsData(data);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+      setPerformSearch(false);
+    }
   };
 
   const debouncedLoadSessions = debounce(() => {
     loadSessions();
   }, 300);
 
-  const loadSessions = async () => {
-    try {
-      setIsLoading(true);
-      setIsError(false);
-      
-      if (route.params?.workoutId && !selectedWorkoutId) {
-        // Load sessions for specific workout (legacy support)
-        const data = await sessionService.getSessionsForWorkout(route.params.workoutId);
-        setSessionsData({
-          items: data,
-          total: data.length,
-          hasMore: false,
-          offset: 0,
-          limit: 20
-        });
-      } else {
-        // Use search API with filters
-        const data = await sessionService.searchSessions(searchParams);
-        setSessionsData(data);
-      }
-    } catch (err) {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    setSelectedWorkoutId(workoutId);
+    setSelectedWorkoutName(workoutName);
+    setPerformSearch(true);
+  }, [workoutId, workoutName])
 
   useEffect(() => {
     debouncedLoadSessions();
-  }, [searchQuery, selectedDateFrom, selectedDateTo, selectedWorkoutId, route.params?.workoutId]);
+  }, [performSearch, pageNo, pageSize]);
 
   const handleRefresh = async () => {
     await execute(async () => {
@@ -92,39 +85,27 @@ export default function SessionList() {
   const clearFilters = () => {
     setSelectedDateFrom(null);
     setSelectedDateTo(null);
-    setSelectedWorkoutId(null);
+    setSelectedWorkoutId(workoutId);
     setSearchQuery('');
+    setPerformSearch(true);
   };
-
-  const sessions = sessionsData?.items || [];
-  const hasActiveFilters = searchQuery || selectedDateFrom || selectedDateTo || selectedWorkoutId;
-
-  const navigateToWorkout = (workoutId?: string) => {
+  
+  const navigateToWorkout = (workoutId?: number, workoutName?: string) => {
     if (workoutId) {
-      navigation.navigate('WorkoutDetail', { id: workoutId });
+      navigation.navigate('WorkoutDetail', { id: workoutId, workoutName: workoutName });
     }
-  };
-
-  const getWorkoutDisplayName = (session: any) => {
-    // Use workoutName if available, fallback to nested workout object
-    if (session.workoutName) {
-      return session.workoutName;
-    }
-    if (session.workout?.name) {
-      return session.workout.name;
-    }
-    // Otherwise, show a generic message with workoutId
-    return session.workoutId ? `Workout ID: ${session.workoutId}` : 'Unknown Workout';
   };
 
   const navigateToCreateSession = () => {
     // If we're viewing sessions for a specific workout, pass that workoutId to CreateSession
-    if (route.params?.workoutId) {
-      navigation.navigate('CreateSession', { workoutId: route.params.workoutId });
+    if (selectedWorkoutId) {
+      navigation.navigate('CreateSession', { workoutId: selectedWorkoutId, workoutName: selectedWorkoutName });
     } else {
       navigation.navigate('CreateSession');
     }
   };
+
+  const hasActiveFilters = searchQuery || selectedDateFrom || selectedDateTo || selectedWorkoutId;
 
   if (isLoading) return <LoadingComponent />;
   if (isError) return <ErrorComponent message='Failed to load Sessions' />
@@ -158,44 +139,44 @@ export default function SessionList() {
             <View style={{ flexDirection: 'row' }}>
               {selectedDateFrom && (
                 <Chip 
-                  onClose={() => setSelectedDateFrom(null)}
+                  onClose={() => {setPerformSearch(true);setSelectedDateFrom(null)}}
                   style={{ 
                     marginRight: 8,
                     backgroundColor: theme.primary,
                     borderColor: theme.primary,
                     borderWidth: 1
                   }}
-                  textStyle={{ color: '#fff' }}
+                  textStyle={{ color: theme.background }}
                 >
                   From: {new Date(selectedDateFrom).toLocaleDateString()}
                 </Chip>
               )}
               {selectedDateTo && (
                 <Chip 
-                  onClose={() => setSelectedDateTo(null)}
+                  onClose={() => {setPerformSearch(true);setSelectedDateTo(null)}}
                   style={{ 
                     marginRight: 8,
                     backgroundColor: theme.primary,
                     borderColor: theme.primary,
                     borderWidth: 1
                   }}
-                  textStyle={{ color: '#fff' }}
+                  textStyle={{ color: theme.background }}
                 >
                   To: {new Date(selectedDateTo).toLocaleDateString()}
                 </Chip>
               )}
               {selectedWorkoutId && (
                 <Chip 
-                  onClose={() => setSelectedWorkoutId(null)}
+                  disabled={true}
                   style={{ 
                     marginRight: 8,
                     backgroundColor: theme.primary,
                     borderColor: theme.primary,
                     borderWidth: 1
                   }}
-                  textStyle={{ color: '#fff' }}
+                  textStyle={{ color: theme.background }}
                 >
-                  Workout Filtered
+                  {selectedWorkoutName}
                 </Chip>
               )}
             </View>
@@ -212,25 +193,25 @@ export default function SessionList() {
       {/* Sessions List */}
       <View style={{ padding: 16 }}>
         <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 16, color: theme.text }}>
-          {route.params?.workoutId 
-            ? `Sessions for Workout ${route.params.workoutId}`
+          {selectedWorkoutId
+            ? `Sessions for Workout ${selectedWorkoutId}`
             : 'Recent Sessions'
           }
         </Text>
         
         <FlatList
-          data={sessions}
-          keyExtractor={(item) => item.id}
+          data={sessionsData.items}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <Card style={{ marginBottom: 8, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
               <Card.Title 
                 title={`Session ${item.id}`}
-                subtitle={getWorkoutDisplayName(item)}
+                subtitle={item.workoutName}
                 right={(props) => (
                   <IconButton
                     {...props}
                     icon="arrow-right"
-                    onPress={() => navigateToWorkout(item.workoutId)}
+                    onPress={() => navigateToWorkout(item.workoutId, item.workoutName)}
                     size={20}
                   />
                 )}
@@ -256,7 +237,7 @@ export default function SessionList() {
               <Card.Actions>
                 <Button 
                   mode="text" 
-                  onPress={() => navigateToWorkout(item.workoutId)}
+                  onPress={() => navigateToWorkout(item.workoutId, item.workoutName)}
                   compact
                 >
                   View Workout
@@ -268,7 +249,7 @@ export default function SessionList() {
             !isLoading && !isError ? (
               <View style={{ alignItems: 'center', padding: 20 }}>
                 <Text style={{ fontSize: 16, color: theme.textSecondary }}>
-                  {route.params?.workoutId 
+                  {selectedWorkoutId 
                     ? 'No sessions found for this workout'
                     : 'No sessions found'
                   }
@@ -325,7 +306,7 @@ export default function SessionList() {
             <Button mode="outlined" onPress={clearFilters}>
               Clear All
             </Button>
-            <Button mode="contained" onPress={() => setShowFilters(false)}>
+            <Button mode="contained" onPress={() => { setPerformSearch(true); setShowFilters(false); }}>
               Apply Filters
             </Button>
           </View>

@@ -88,7 +88,7 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
     </ScrollView>
     <Button 
           mode="contained" 
-          onPress={() => nav.navigate('CreateSession', { workoutId: id })} 
+          onPress={() => nav.navigate('CreateSession', { workoutId: workout.id, workoutName: workout.name })} 
           style={{ margin: 16, marginBottom: 8, width: 200 }}
           buttonColor={theme.primary}
           textColor={theme.background}
@@ -98,7 +98,7 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
 
     <Button 
       mode="contained" 
-      onPress={() => nav.navigate('SessionList', { workoutId: id })} 
+      onPress={() => nav.navigate('SessionList', { workoutId: workout.id, workoutName: workout.name })} 
       style={{ margin: 16, marginTop: 8, width: 200 }}
       buttonColor={theme.primary}
       textColor={theme.background}

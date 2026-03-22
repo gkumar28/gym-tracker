@@ -53,8 +53,8 @@ export type RootStackParamList = {
   WorkoutDetail: { id: number, workoutName: string };
   CreateWorkout: undefined;
   UpdateWorkout: {workout: Workout};
-  SessionList: { workoutId?: number };
-  CreateSession: { workoutId?: number };
+  SessionList: { workoutId?: number, workoutName: string };
+  CreateSession: { workoutId?: number, workoutName: string };
   Error: { error?: string };
 };
 
@@ -83,7 +83,7 @@ function WorkoutsStack() {
     >
       <Stack.Screen name="WorkoutsList" component={WorkoutsList} options={{ title: 'Workouts', headerShown: false }} />
       <Stack.Screen name="WorkoutDetail" options={({route}) => { 
-        return {title: `Workout Details for ${route.params.workoutName}`, headerShown: true }
+        return {title: `Details for ${route.params.workoutName}`, headerShown: true }
       }}>
         {({ route }) => (
           <WorkoutDetail
@@ -101,7 +101,17 @@ function WorkoutsStack() {
           />
         )}
       </Stack.Screen>
-      <Stack.Screen name="SessionList" component={SessionList} options={{ title: 'Sessions', headerShown: true }} />
+      <Stack.Screen name="SessionList" options={({route}) => {  
+        if (!route.params.workoutName) { return {title: `Sessions`, headerShown: true } }
+        return {title: `Sessions for ${route.params.workoutName}`, headerShown: true } 
+      }}>
+        {({ route }) => (
+          <SessionList
+            workoutId={route.params.workoutId}
+            workoutName={route.params.workoutName}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="CreateSession" component={CreateSession} options={{ title: 'Create Session', headerShown: true }} />
       <Stack.Screen name="Error" component={ErrorScreen} options={{ title: 'Error', headerShown: false }} />
     </Stack.Navigator>

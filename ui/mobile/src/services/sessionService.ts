@@ -1,34 +1,14 @@
 // src/services/sessionService.ts
+import { PaginatedResponse } from '../types/api';
+import { Session } from '../types/session';
+import { getExerciseEntity, getExerciseItems } from '../utils/generic';
 import { baseApi } from './api';
-
-export interface Session {
-  id: string;
-  workoutId?: string;
-  workoutName?: string;
-  workout?: {
-    id: string;
-    name: string;
-  };
-  sessionExercises?: any[];
-  sessionDate?: string;
-  durationMinutes?: number;
-  notes?: string;
-  exerciseCount?: number;
-}
-
-export interface PaginatedSessionResponse {
-  items: Session[];
-  total: number;
-  hasMore: boolean;
-  offset: number;
-  limit: number;
-}
 
 export interface SessionSearchParams {
   page?: number;
   size?: number;
   sort?: string;
-  workoutId?: string;
+  workoutId?: number;
   dateFrom?: string;
   dateTo?: string;
   minDuration?: number;
@@ -39,14 +19,14 @@ export interface SessionSearchParams {
 
 export class SessionService {
   // Search sessions with pagination and filters
-  async searchSessions(params?: SessionSearchParams): Promise<PaginatedSessionResponse> {
+  async searchSessions(params?: SessionSearchParams): Promise<PaginatedResponse<Session>> {
     try {
       const queryParams = new URLSearchParams();
       
       if (params?.page !== undefined) queryParams.append('page', params.page.toString());
       if (params?.size !== undefined) queryParams.append('size', params.size.toString());
       if (params?.sort) queryParams.append('sort', params.sort);
-      if (params?.workoutId) queryParams.append('workoutId', params.workoutId);
+      if (params?.workoutId) queryParams.append('workoutId', params.workoutId.toString());
       if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom);
       if (params?.dateTo) queryParams.append('dateTo', params.dateTo);
       if (params?.minDuration !== undefined) queryParams.append('minDuration', params.minDuration.toString());
@@ -64,9 +44,10 @@ export class SessionService {
   }
 
   // Get session by ID
-  async getSessionById(id: string): Promise<Session | null> {
+  async getSessionById(id: number): Promise<Session | null> {
     try {
       const response = await baseApi.get(`/session/${id}`);
+      response.data.workoutItems = getExerciseItems(response.data?.workoutExercises);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch session:', error);
@@ -75,9 +56,12 @@ export class SessionService {
   }
 
   // Get sessions for a specific workout
-  async getSessionsForWorkout(workoutId: string): Promise<Session[]> {
+  async getSessionsForWorkout(workoutId: number): Promise<Session[]> {
     try {
       const response = await baseApi.get(`/session/workout/${workoutId}`);
+      response.data.forEach(session => {
+        session.workoutItems = getExerciseItems(session.workoutExercises);
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch sessions for workout:', error);
@@ -88,6 +72,8 @@ export class SessionService {
   // Create new session
   async createSession(session: Omit<Session, 'id'>): Promise<Session> {
     try {
+      const sessionEntity: any = session;
+      sessionEntity.sessionExercises = getExerciseEntity(session.sessionItems);
       const response = await baseApi.post('/session', session);
       return response.data;
     } catch (error) {
@@ -99,6 +85,8 @@ export class SessionService {
   // Update session
   async updateSession(id: string, session: Partial<Session>): Promise<Session> {
     try {
+      const sessionEntity: any = session;
+      sessionEntity.sessionExercises = getExerciseEntity(session.sessionItems);
       const response = await baseApi.put(`/session/${id}`, session);
       return response.data;
     } catch (error) {

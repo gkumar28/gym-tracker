@@ -8,9 +8,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import ExerciseCard from '../../components/ExerciseCard';
-import { Workout, WorkouteRestAfterExercise, WorkoutExercise, WorkoutItem, WorkoutSet } from '../../types/workout';
+import { Workout } from '../../types/workout';
 import RestCard from '../../components/RestCard';
 import { toast } from 'react-toastify';
+import { ExerciseItem, ExerciseSet, RestAfterExercise } from '../../types/common';
 
 type UpdateWorkoutProps = {
     workout: Workout
@@ -24,7 +25,7 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   });
   
   const [workoutName, setWorkoutName] = useState<string>('');
-  const [items, setItems] = useState<WorkoutItem[]>([]);
+  const [items, setItems] = useState<ExerciseItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
@@ -33,12 +34,12 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
   }, [workout])
 
   const addExercise = () => {
-    const newExercise: WorkoutExercise = {
+    const newExercise: ExerciseSet = {
       exerciseName: '',
       sets: [{ reps: 8, weight: 50, restSeconds: 60 }],
     };
 
-    const rest: WorkouteRestAfterExercise = {
+    const rest: RestAfterExercise = {
       restAfterExercise: 60
     }
 
@@ -53,7 +54,7 @@ export default function UpdateWorkout({ workout }: UpdateWorkoutProps) {
     console.log(1)
   };
 
-  const updateExercise = (index: number, updates: Partial<WorkoutExercise>) => {
+  const updateExercise = (index: number, updates: Partial<ExerciseSet>) => {
     setItems(items.map((item, id) => 
       id == index && item.type == "EXERCISE" ? { type: item.type, data: { ...item.data, ...updates }} : item
     ));

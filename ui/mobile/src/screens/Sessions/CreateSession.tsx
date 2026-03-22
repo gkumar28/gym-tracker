@@ -24,7 +24,7 @@ import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import { debounce } from 'lodash';
 import ExerciseCard from '../../components/ExerciseCard';
-import { WorkoutExercise, WorkoutSet } from '../../types/workout';
+import { ExerciseSet } from '../../types/common';
 
 type CreateSessionNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateSession'>;
 
@@ -39,7 +39,7 @@ export default function CreateSession() {
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
   const [durationMinutes, setDurationMinutes] = useState('');
   const [notes, setNotes] = useState('');
-  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const [exercises, setExercises] = useState<ExerciseSet[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [workoutDetails, setWorkoutDetails] = useState<any>(null);
@@ -98,7 +98,7 @@ export default function CreateSession() {
   }, [isFromWorkoutDetail, workoutId]);
 
   const addExercise = () => {
-    const newExercise: WorkoutExercise = {
+    const newExercise: ExerciseSet = {
       id: Date.now().toString(),
       exerciseName: '',
       sets: [{ id: Date.now().toString(), reps: 0, weight: 0, restSeconds: 60 }],
@@ -110,7 +110,7 @@ export default function CreateSession() {
     setExercises(prevExercises => prevExercises.filter(ex => ex.id !== id));
   };
 
-  const updateExercise = (exerciseId: string, updates: Partial<WorkoutExercise>) => {
+  const updateExercise = (exerciseId: string, updates: Partial<ExerciseSet>) => {
     setExercises(prevExercises => 
       prevExercises.map(ex => 
         ex.id === exerciseId ? { ...ex, ...updates } : ex

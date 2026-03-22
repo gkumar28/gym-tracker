@@ -1,7 +1,16 @@
+import { ExerciseItem } from "./common";
+
 export interface Session {
-    id: string;
-    workoutId?: string;
-    sessionExercises?: any[];
+    id: number;
+    workoutId?: number;
+    workoutName?: string;
+    workout?: {
+        id: string;
+        name: string;
+    };
+    sessionItems?: ExerciseItem[];
     sessionDate?: string;
     durationMinutes?: number;
+    notes?: string;
+    exerciseCount?: number;
 }
