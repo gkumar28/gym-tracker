@@ -13,7 +13,7 @@ import ExerciseSearch from '../screens/Exercises/ExerciseSearch';
 import { ErrorScreen } from '../screens/ErrorScreen';
 import { useTheme } from '../hooks/useTheme';
 import UpdateWorkout from '../screens/Workouts/UpdateWorkout';
-import { Workout } from '../services/workoutService';
+import { Workout } from '../types/workout';
 
 // Create a navigation ref that can be accessed globally
 export const navigationRef = React.createRef<any>();

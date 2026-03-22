@@ -4,12 +4,10 @@ import {
   Card,
   Text,
   Button,
-  ActivityIndicator,
-  IconButton,
   Searchbar,
   FAB
 } from 'react-native-paper';
-import { workoutService, Workout, PaginatedWorkoutResponse } from '../../services/workoutService';
+import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +16,8 @@ import { RootStackParamList } from '../../navigation';
 import { debounce } from 'lodash';
 import LoadingComponent from '../../components/LoadingComponent';
 import ErrorComponent from '../../components/ErrorComponent';
+import { PaginatedResponse } from '../../types/api';
+import { Workout } from '../../types/workout';
 
 type WorkoutListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'WorkoutsList'>;
 
@@ -30,7 +30,7 @@ export default function WorkoutsList() {
     showNetworkErrorScreen: true
   });
 
-  const [workouts, setWorkouts] = useState<PaginatedWorkoutResponse | null>(null);
+  const [workouts, setWorkouts] = useState<PaginatedResponse<Workout> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,7 +76,7 @@ export default function WorkoutsList() {
     });
   };
 
-  const navigateToWorkout = (id: string, workoutName: string) => {
+  const navigateToWorkout = (id: number, workoutName: string) => {
     navigation.navigate('WorkoutDetail', { id, workoutName });
   };
 
@@ -130,7 +130,7 @@ export default function WorkoutsList() {
           showsVerticalScrollIndicator={false}
           removeClippedSubviews={true}
           data={workouts?.items || []}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}`}
           renderItem={({ item }) => (
             <Card
               style={{

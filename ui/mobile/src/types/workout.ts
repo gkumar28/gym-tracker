@@ -26,3 +26,11 @@ export type WorkoutItem =
     type: "REST";
     data: WorkouteRestAfterExercise;
   };
+
+export interface Workout {
+  id: number;
+  name?: string;
+  createdAt?: string;
+  exerciseCount?: number;
+  workoutItems?: WorkoutItem[];
+}

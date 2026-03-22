@@ -75,44 +75,12 @@ export default function CreateWorkout() {
       return;
     }
 
-    // Convert to backend format
-    const workoutExercises = [];
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-    
-      if (item.type === 'EXERCISE') {
-        let restAfter = 0;
-        const nextItem = items[i + 1];
-        if (nextItem && nextItem.type === "REST") {
-          restAfter = nextItem.data.restAfterExercise;
-        }
-    
-        workoutExercises.push({
-          exerciseName: item.data.exerciseName,
-          sets: item.data.sets.map(set => ({
-            reps: set.reps,
-            weight: set.weight,
-            restSeconds: set.restSeconds,
-          })),
-          restAfterExerciseSeconds: restAfter,
-        });
-      }
-    }
-
-    // Set exercise order based on array index
-    workoutExercises.forEach((exercise, index) => {
-      exercise.exerciseOrder = index;
-    });
-
-    const payload = { name: workoutName, workoutExercises };
-    
-    setIsSaving(true);
-    
+    setIsSaving(true);    
     const result = await execute(async () => {
       let workout;
     
       try {
-        workout = await workoutService.createWorkout(payload);
+        workout = await workoutService.createWorkout({name: workoutName, workoutItems: items});
         toast.success("Workout Created Successfully!");
       } catch (error) {
         const message = error?.message || "Some error has occurred. Please try again later";

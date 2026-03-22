@@ -30,7 +30,7 @@ export const exerciseApi: AxiosInstance = axios.create({
   api.interceptors.request.use(
     (config) => {
       if (ConfigProvider.getInstance().getFeatureFlags().enableLogging) {
-        console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+        console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
       }
       return config;
     },
@@ -43,7 +43,7 @@ export const exerciseApi: AxiosInstance = axios.create({
   api.interceptors.response.use(
     (response) => {
       if (ConfigProvider.getInstance().getFeatureFlags().enableLogging) {
-        console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+        console.log(`API Response: ${response.status} ${response.config.url}`);
       }
       return response;
     },
@@ -52,7 +52,7 @@ export const exerciseApi: AxiosInstance = axios.create({
       
       // Check if it's a network error
       if (NetworkErrorHandler.isNetworkError(error)) {
-        console.log('🚫 Network error detected:', NetworkErrorHandler.getErrorMessage(error));
+        console.log('Network error detected:', NetworkErrorHandler.getErrorMessage(error));
         return Promise.reject(error);
       }
       
@@ -61,7 +61,7 @@ export const exerciseApi: AxiosInstance = axios.create({
         originalRequest._retry = true;
         originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
         
-        console.log(`🔄 Retrying request (${originalRequest._retryCount}/${config.getApiConfig().retryAttempts})`);
+        console.log(`Retrying request (${originalRequest._retryCount}/${config.getApiConfig().retryAttempts})`);
         
         // Exponential backoff
         const delay = Math.pow(2, originalRequest._retryCount) * 1000;

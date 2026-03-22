@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Text, IconButton, Card } from 'react-native-paper';
-import { Workout, workoutService } from '../../services/workoutService';
+import { workoutService } from '../../services/workoutService';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { useNavigation, useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import ExerciseCard from '../../components/ExerciseCard';
-import { WorkouteRestAfterExercise, WorkoutExercise, WorkoutItem, WorkoutSet } from '../../types/workout';
+import { Workout, WorkouteRestAfterExercise, WorkoutExercise, WorkoutItem, WorkoutSet } from '../../types/workout';
 import RestCard from '../../components/RestCard';
 import { toast } from 'react-toastify';
 

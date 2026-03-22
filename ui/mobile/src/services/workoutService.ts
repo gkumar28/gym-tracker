@@ -1,44 +1,8 @@
 // src/services/workoutService.ts
+import { PaginatedResponse } from '../types/api';
+import { Workout, WorkoutItem } from '../types/workout';
 import { baseApi } from './api';
-
-export interface Workout {
-  id: string;
-  name?: string;
-  createdAt?: string;
-  exerciseCount?: number,
-  workoutExercises?: WorkoutExercise[];
-}
-
-export interface WorkoutExercise {
-  id?: string;
-  exerciseName?: string;
-  sets?: WorkoutSet[];
-  exerciseOrder?: number;
-  restAfterExerciseSeconds?: number;
-}
-
-export interface WorkoutSet {
-  reps?: number;
-  weight?: number;
-  restSeconds?: number;
-  notes?: string;
-}
-
-export interface Session {
-  id: string;
-  workoutId?: string;
-  sessionExercises?: any[];
-  sessionDate?: string;
-  durationMinutes?: number;
-}
-
-export interface PaginatedWorkoutResponse {
-  items: Workout[];
-  total: number;
-  hasMore: boolean;
-  offset: number;
-  limit: number;
-}
+import { Session } from './sessionService';
 
 export interface WorkoutSearchParams {
   page?: number;
@@ -49,9 +13,70 @@ export interface WorkoutSearchParams {
   createdDateTo?: string;
 }
 
+export function getWorkoutItems(workoutExercises) {
+  const items: WorkoutItem[] = [];
+
+  for (let i = 0;i < workoutExercises.length;i++) {
+    let exercise = workoutExercises[i];
+    items.push({
+      type: 'EXERCISE',
+      data: {
+        exerciseName: exercise.exerciseName,
+        sets: exercise.sets.map(set => ({
+          reps: set.reps,
+          weight: set.weight,
+          restSeconds: set.restSeconds,
+        })),
+      },
+    });
+
+    // 2. Add the Rest item if a rest duration exists
+    if (i != workoutExercises.length - 1) {
+      items.push({
+        type: 'REST',
+        data: {
+          restAfterExercise: exercise.restAfterExerciseSeconds,
+        },
+      });
+    }
+  }
+
+  return items;
+}
+
+export function getWorkoutExercisesEntity(workoutItems: WorkoutItem[]) {
+  const workoutExercises = [];
+  for (let i = 0; i < workoutItems?.length; i++) {
+    const item = workoutItems[i];
+  
+    if (item.type === 'EXERCISE') {
+      let restAfter = 0;
+      const nextItem = workoutItems[i + 1];
+      if (nextItem && nextItem.type === "REST") {
+        restAfter = nextItem.data.restAfterExercise;
+      }
+  
+      workoutExercises.push({
+        exerciseName: item.data.exerciseName,
+        sets: item.data.sets.map(set => ({
+          reps: set.reps,
+          weight: set.weight,
+          restSeconds: set.restSeconds,
+        })),
+        restAfterExerciseSeconds: restAfter,
+      });
+    }
+  }
+  workoutExercises.forEach((exercise, index) => {
+    exercise.exerciseOrder = index;
+  });
+
+  return workoutExercises;
+}
+
 export class WorkoutService {
   // Search workouts with pagination and filters
-  async searchWorkouts(params?: WorkoutSearchParams): Promise<PaginatedWorkoutResponse> {
+  async searchWorkouts(params?: WorkoutSearchParams): Promise<PaginatedResponse<Workout>> {
     try {
       const queryParams = new URLSearchParams();
       
@@ -75,6 +100,7 @@ export class WorkoutService {
   async getWorkoutById(id: number): Promise<Workout | null> {
     try {
       const response = await baseApi.get(`/workout/${id}`);
+      response.data.workoutItems = getWorkoutItems(response.data?.workoutExercises);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch workout:', error);
@@ -85,6 +111,8 @@ export class WorkoutService {
   // Create new workout
   async createWorkout(workout: Omit<Workout, 'id' | 'createdAt'>): Promise<Workout> {
     try {
+      let workoutEntity: any = workout;
+      workoutEntity.workoutExercises = getWorkoutExercisesEntity(workout.workoutItems);
       const response = await baseApi.post('/workout', workout);
       return response.data;
     } catch (error) {

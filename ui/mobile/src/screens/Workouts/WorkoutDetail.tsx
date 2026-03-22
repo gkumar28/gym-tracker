@@ -4,13 +4,14 @@ import { Text, Card, Button, ActivityIndicator, FAB } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
-import { Workout, workoutService } from '../../services/workoutService';
+import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import LoadingComponent from '../../components/LoadingComponent';
 import ErrorComponent from '../../components/ErrorComponent';
 import ViewExerciseCard from '../../components/ViewExerciseCard';
 import ViewRestCard from '../../components/ViewRestCard';
+import { Workout } from '../../types/workout';
 
 export default function WorkoutDetail() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList, 'WorkoutDetail'>>();
@@ -71,17 +72,17 @@ export default function WorkoutDetail() {
     <View style={{ flex: 1, backgroundColor: theme.background}}>
       <ScrollView style={{ backgroundColor: theme.background }}>
       <View style={{ padding: 16 }}>
-      {workout.workoutExercises?.map((exercise, index) => (
+      {workout.workoutItems?.map((item, index) => (
         <React.Fragment>
-          <ViewExerciseCard
+          {item.type === "EXERCISE" && <ViewExerciseCard
             key={`key-${index}`}
-            exercise={exercise}
+            exercise={item.data}
             index={index}
-          />
+          />}
 
-          {index !== workout.workoutExercises.length - 1 && (
+          {item.type === "REST" && (
             <ViewRestCard
-              value={exercise.restAfterExerciseSeconds}
+              value={item.data?.restAfterExercise || 0}
             />
           )}
         </React.Fragment>
