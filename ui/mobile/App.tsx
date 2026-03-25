@@ -30,7 +30,7 @@ function AppContent() {
       <NavigationContainer ref={navigationRef}>
         <View style={styles.container}>
           <AppHeader />
-          <ToastContainer position="top-center" autoClose={1000} toastStyle={{color: theme.text, backgroundColor: theme.background}}/>
+          <ToastContainer position="top-center" autoClose={2000} toastStyle={{color: theme.text, backgroundColor: theme.background}}/>
           <RootNavigator />
         </View>
       </NavigationContainer>

@@ -15,7 +15,7 @@ export interface WorkoutSearchParams {
   createdDateTo?: string;
 }
 
-export class WorkoutService {
+class WorkoutService {
   // Search workouts with pagination and filters
   async searchWorkouts(params?: WorkoutSearchParams): Promise<PaginatedResponse<Workout>> {
     try {

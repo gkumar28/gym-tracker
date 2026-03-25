@@ -102,7 +102,7 @@ function WorkoutsStack() {
         )}
       </Stack.Screen>
       <Stack.Screen name="SessionList" options={({route}) => {  
-        if (!route.params.workoutName) { return {title: `Sessions`, headerShown: true } }
+        if (!route.params?.workoutName) { return {title: `Sessions`, headerShown: true } }
         return {title: `Sessions for ${route.params.workoutName}`, headerShown: true } 
       }}>
         {({ route }) => (

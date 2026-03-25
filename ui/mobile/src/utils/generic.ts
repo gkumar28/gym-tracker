@@ -1,15 +1,27 @@
+import { API_CONSTANTS, UI_CONSTANTS } from "../constants/constants";
 import { ExerciseItem } from "../types/common";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(utc); 
+dayjs.extend(customParseFormat); 
 
 // ui/mobile/src/utils/dateUtils.ts
-export function formatTimestamp(dateStr: string | Date | undefined | null): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  const day = d.getDate();
-  const month = d.toLocaleString('en', { month: 'short' });
-  const year = d.getFullYear();
-  const time = d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return `${day} ${month}, ${year} ${time}`;
+export function formatDate(date: Date): string {
+  return dayjs(date).format(UI_CONSTANTS.DATE_FORMAT);
+}
+
+export function getDate(dateStr: string): Date {
+  return dayjs(dateStr, UI_CONSTANTS.DATE_FORMAT).local().toDate();
+}
+
+export function formatDateToAPI(date: Date): string {
+  return dayjs(date).utc().format(API_CONSTANTS.BE_DATE_FORMAT);
+}
+
+export function getDateFromAPI(dateStr: string): Date {
+  return dayjs.utc(dateStr, API_CONSTANTS.BE_DATE_FORMAT).local().toDate();
 }
 
 export function getExerciseItems(exerciseEntities) {

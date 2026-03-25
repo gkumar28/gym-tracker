@@ -17,7 +17,7 @@ export interface SessionSearchParams {
   workoutName?: string; // Filter by workout name
 }
 
-export class SessionService {
+class SessionService {
   // Search sessions with pagination and filters
   async searchSessions(params?: SessionSearchParams): Promise<PaginatedResponse<Session>> {
     try {

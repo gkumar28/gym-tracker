@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, ScrollView } from 'react-native';
 import { Card, Text, Button, IconButton, Searchbar, Chip, Portal, Modal, FAB } from 'react-native-paper';
-import { sessionService, SessionSearchParams } from '../../services/sessionService';
+import { sessionService } from '../../services/sessionService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import ErrorComponent from '../../components/ErrorComponent';
 import { useNavigation } from '@react-navigation/native';
 import { PaginatedResponse } from '../../types/api';
 import { Session } from '../../types/session';
+import { formatDate, formatDateToAPI, getDateFromAPI } from '../../utils/generic';
 
 type SessionListProps = { workoutId?: number, workoutName?: string }
 
@@ -25,31 +26,29 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
   const [sessionsData, setSessionsData] = useState<PaginatedResponse<Session> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null);
-  const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null);
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(null);
-  const [selectedWorkoutName, setSelectedWorkoutName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null);
+  const [selectedDateTo, setSelectedDateTo] = useState<Date | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(workoutId);
+  const [selectedWorkoutName, setSelectedWorkoutName] = useState<string | null>(workoutName);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState<number>(0);
-  const [searchParams, setSearchParams] = useState<SessionSearchParams | null>(null);
-  const [performSearch, setPerformSearch] = useState<boolean>(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [applyFilters, setApplyFilters] = useState<number>(0);
   
   const loadSessions = async () => {
-    if (!performSearch) { return; }
 
     try {
       setIsLoading(true);
       setIsError(false);
-      setSearchParams({
+      const searchParams = {
         search: searchQuery,
-        dateFrom: selectedDateFrom,
-        dateTo: selectedDateTo,
+        sessionDateFrom: formatDateToAPI(selectedDateFrom),
+        sessionDateTo: formatDateToAPI(selectedDateTo),
         workoutId: selectedWorkoutId,
         size: pageSize,
         page: pageNo
-      })
+      }
       
       const data = await sessionService.searchSessions(searchParams);
       setSessionsData(data);
@@ -57,27 +56,30 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
       setIsError(true);
     } finally {
       setIsLoading(false);
-      setPerformSearch(false);
     }
   };
 
-  const debouncedLoadSessions = debounce(() => {
+  const debouncedLoadSessions = React.useMemo(
+    () =>
+      debounce((text: string) => {
+        setSearchQuery(text);
+        loadSessions();
+      }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedLoadSessions(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (applyFilters === 0) return;
     loadSessions();
-  }, 300);
-
-  useEffect(() => {
-    setSelectedWorkoutId(workoutId);
-    setSelectedWorkoutName(workoutName);
-    setPerformSearch(true);
-  }, [workoutId, workoutName])
-
-  useEffect(() => {
-    debouncedLoadSessions();
-  }, [performSearch, pageNo, pageSize]);
+  }, [applyFilters, pageNo, pageSize]);
 
   const handleRefresh = async () => {
     await execute(async () => {
-      debouncedLoadSessions();
+      loadSessions();
       return Promise.resolve();
     });
   };
@@ -85,9 +87,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
   const clearFilters = () => {
     setSelectedDateFrom(null);
     setSelectedDateTo(null);
-    setSelectedWorkoutId(workoutId);
     setSearchQuery('');
-    setPerformSearch(true);
   };
   
   const navigateToWorkout = (workoutId?: number, workoutName?: string) => {
@@ -107,7 +107,6 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
 
   const hasActiveFilters = searchQuery || selectedDateFrom || selectedDateTo || selectedWorkoutId;
 
-  if (isLoading) return <LoadingComponent />;
   if (isError) return <ErrorComponent message='Failed to load Sessions' />
 
   return (
@@ -139,7 +138,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
             <View style={{ flexDirection: 'row' }}>
               {selectedDateFrom && (
                 <Chip 
-                  onClose={() => {setPerformSearch(true);setSelectedDateFrom(null)}}
+                  onClose={() => {setSelectedDateFrom(null)}}
                   style={{ 
                     marginRight: 8,
                     backgroundColor: theme.primary,
@@ -153,7 +152,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
               )}
               {selectedDateTo && (
                 <Chip 
-                  onClose={() => {setPerformSearch(true);setSelectedDateTo(null)}}
+                  onClose={() => {setSelectedDateTo(null)}}
                   style={{ 
                     marginRight: 8,
                     backgroundColor: theme.primary,
@@ -191,9 +190,10 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
       </View>
 
       {/* Sessions List */}
-      <View style={{ padding: 16 }}>
-        <FlatList
-          data={sessionsData.items}
+      <View style={{ padding: 16, flex: 1 }}>
+        {isLoading ? (<LoadingComponent/>) : (<FlatList
+          showsVerticalScrollIndicator={false}
+          data={sessionsData?.items}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <Card style={{ marginBottom: 8, backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
@@ -210,7 +210,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
                 )}
               />
               <Card.Content>
-                <Text style={{ color: theme.text }}>{new Date(item.sessionDate || '').toLocaleString()}</Text>
+                <Text style={{ color: theme.text }}>{formatDate(getDateFromAPI(item.sessionDate))}</Text>
                 {item.durationMinutes && (
                   <Text style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>
                     Duration: {item.durationMinutes} minutes
@@ -255,7 +255,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
               </View>
             ) : null
           }
-        />
+        />)}
       </View>
 
       {/* Filter Modal */}
@@ -281,14 +281,14 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
             </Text>
             <Button 
               mode="outlined" 
-              onPress={() => setSelectedDateFrom(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])}
+              onPress={() => setSelectedDateFrom(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))}
               style={{ marginBottom: 8 }}
             >
               Last 7 Days
             </Button>
             <Button 
               mode="outlined" 
-              onPress={() => setSelectedDateFrom(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])}
+              onPress={() => setSelectedDateFrom(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))}
               style={{ marginBottom: 16 }}
             >
               Last 30 Days
@@ -299,7 +299,7 @@ export default function SessionList({ workoutId, workoutName }: SessionListProps
             <Button mode="outlined" onPress={clearFilters}>
               Clear All
             </Button>
-            <Button mode="contained" onPress={() => { setPerformSearch(true); setShowFilters(false); }}>
+            <Button mode="contained" onPress={() => {setShowFilters(false);setApplyFilters(applyFilters + 1);}}>
               Apply Filters
             </Button>
           </View>

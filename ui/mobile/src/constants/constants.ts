@@ -24,6 +24,9 @@ export const API_CONSTANTS = {
     EXERCISES: 5 * 60 * 1000, // 5 minutes
     CATEGORIES: 30 * 60 * 1000, // 30 minutes
   },
+
+  // Date formats
+  BE_DATE_FORMAT: 'YYYY-MM-DD HH:mm:ss',
 } as const;
 
 export const UI_CONSTANTS = {
@@ -50,6 +53,7 @@ export const UI_CONSTANTS = {
     LG: 24,
     XL: 32,
   },
+  DATE_FORMAT: 'DD MMM YYYY, hh:mm A'
 } as const;
 
 export const ERROR_MESSAGES = {

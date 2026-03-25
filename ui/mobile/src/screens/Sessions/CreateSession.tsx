@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   View, 
   ScrollView, 
@@ -10,26 +10,23 @@ import {
   TextInput,
   Button,
   Card,
-  Text,
-  IconButton,
-  Searchbar,
-  Chip
+  Text
 } from 'react-native-paper';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation';
 import { sessionService } from '../../services/sessionService';
 import { workoutService } from '../../services/workoutService';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useTheme } from '../../hooks/useTheme';
-import { create, debounce } from 'lodash';
+import { debounce } from 'lodash';
 import ExerciseCard from '../../components/ExerciseCard';
 import { ExerciseItem, ExerciseSet, RestAfterExercise } from '../../types/common';
-import { equalsIgnoreCase } from '../../utils/generic';
-import { Workout } from '../../types/workout';
+import { formatDate, formatDateToAPI, getDate } from '../../utils/generic';
 import { toast } from 'react-toastify';
 import RestCard from '../../components/RestCard';
 import { AutocompleteDropdown, AutocompleteDropdownItem } from 'react-native-autocomplete-dropdown';
+import LoadingComponent from '../../components/LoadingComponent';
 
 
 type CreateSessionProps = { workoutId: number, workoutName: string}
@@ -41,17 +38,32 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
     showNetworkErrorScreen: true,
   });
 
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [sessionDate, setSessionDate] = useState(new Date());
   const [durationMinutes, setDurationMinutes] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<ExerciseItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Workout selection state
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(workoutId);
   const [selectedWorkoutName, setSelectedWorkoutName] = useState<string | null>(workoutName);
+  const [isworkoutEditable, setIsWorkoutEditable] = useState<boolean>(false);
   const [workoutSearchResult, setWorkoutSearchResult] = useState<AutocompleteDropdownItem[] | null>(null);
   const workoutResultCacheRef = useRef<Record<string, AutocompleteDropdownItem[] | null>>({});
+
+  useEffect(() => {
+
+    setIsLoading(true);
+    workoutService.getWorkoutById(workoutId).then((workout) => {
+      setSelectedWorkoutId(workoutId);
+      setSelectedWorkoutName(workoutName);
+      setItems(workout.workoutItems);
+      setIsLoading(false);
+    });
+    
+    
+  }, [workoutId, workoutName]);
 
   // Search workouts
   const debouncedSearchWorkouts = debounce(async (text: string) => {
@@ -79,7 +91,11 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
     }
   }, 300);
 
-  const selectItem = (item) => {setSelectedWorkoutId(Number(item?.id)); setSelectedWorkoutName(item?.title)};
+  const selectItem = (item) => {
+    if (!item) { return; }
+    setSelectedWorkoutId(Number(item?.id));
+    setSelectedWorkoutName(item?.title);
+  };
   const textChange = (text?: string) => debouncedSearchWorkouts(text);
   const textInputComponent = useCallback((props) => {
   
@@ -88,6 +104,8 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
         {...props}
         label='Workout Name'
         mode="outlined"
+        editable={isworkoutEditable}
+        value={workoutName}
         style={[
           {
             color: theme.text,
@@ -155,7 +173,7 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
       try {
         createdSession = await sessionService.createSession({
           workoutId: selectedWorkoutId,
-          sessionDate: new Date(sessionDate).toISOString(),
+          sessionDate: formatDateToAPI(sessionDate),
           durationMinutes: parseInt(durationMinutes) || undefined,
           notes: notes.trim() || undefined,
           sessionItems: items });
@@ -172,23 +190,25 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
           navigation.reset({
             index: 10,
             routes: [
-              { name: "SessionList" },
+              { name: "SessionList", params: {workoutId: selectedWorkoutId, workoutName: selectedWorkoutName}},
               //{name: "SessionDetail", params: { id: createdSession.id, workoutId: selectedWorkoutId, workoutName: selectedWorkoutName}}
             ]
           });
         } else {
           navigation.reset({
             index: 0,
-            routes: [{ name: "SessionList" }]
+            routes: [{ name: "SessionList", params: {workoutId: selectedWorkoutId, workoutName: selectedWorkoutName}},]
           });
         }
-      }, 1000);
+      }, 2000);
       
       return !!createdSession;
     });
     
     setIsSaving(false);
   };
+
+  if (isLoading) { return (<LoadingComponent />); }
 
   return (
     <KeyboardAvoidingView 
@@ -208,6 +228,7 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
               <Card.Title title={"Workout"}/>
               <Card.Content>
                 <AutocompleteDropdown
+                  initialValue={selectedWorkoutName}
                   dataSet={workoutSearchResult}
                   useFilter={false}
                   onSelectItem={selectItem}        
@@ -254,8 +275,8 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
               <Card.Content>
                 <TextInput
                   label={'Date'}
-                  value={sessionDate}
-                  onChangeText={setSessionDate}
+                  value={formatDate(sessionDate)}
+                  onChangeText={text => setSessionDate(getDate(text))}
                   style={{ backgroundColor: theme.background }}
                   mode='outlined'
                 />
@@ -389,7 +410,7 @@ export default function CreateSession({ workoutId, workoutName}: CreateSessionPr
             }
           }}
         >
-          Save Workout
+          Save Session
         </Button>
       </View>
       </ScrollView>
